@@ -36,6 +36,14 @@ while any job awaits that action.
 - Hunyuan accepted Front and Back on attempt 1 and Right on attempt 2.
 - Hunyuan rejected Top and Left on both allowed attempts, including the prepared dark-gray
   high-contrast retry images.
-- The run is flagged for human review before generation. It must not be represented as submitted.
+- The Product Owner accepted proceeding with the three detected views for this MVP run.
+- A real Hunyuan job was submitted with Front, Right and Back; geometry and texture generation
+  completed and the GLB download control became available.
+- Top/Left failure diagnosis is probabilistic because Hunyuan exposes only `Detection failed`:
+  Top is a flat orthographic roof view with no visible vertical face, while Left is not a coherent
+  true side elevation of the same building. File format and background are unlikely primary causes,
+  because the dark-gray retry retained the same failures while Right passed.
+- A future controlled A/B check should compare (a) an oblique aerial Top showing roof plus two
+  facades and (b) a true 30-45 degree Left view, changing only one variable per attempt.
 - The UI now separates `Open Hunyuan` from `Confirm Hunyuan Submission`, preventing a premature
   `Awaiting Manual Download` transition.
