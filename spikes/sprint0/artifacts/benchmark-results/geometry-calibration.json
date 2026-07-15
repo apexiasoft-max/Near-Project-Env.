@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "fixture_status": "provider_aerial_human_reviewed_approximate_not_survey_ground_truth",
+  "sample_count": 5,
+  "rows": [
+    {
+      "site_id": "THR-VANAK-01",
+      "reference_height_m": 31.0,
+      "one_floor_tolerance_m": 3.4,
+      "height": {
+        "floor_count": {
+          "estimate_m": 30.599999999999998,
+          "absolute_error_m": 0.40000000000000213,
+          "within_one_floor": true
+        },
+        "shadow": {
+          "estimate_m": 31.489877491643814,
+          "absolute_error_m": 0.48987749164381356,
+          "within_one_floor": true
+        }
+      },
+      "footprint": {
+        "threshold_bbox_iou": 0.8744939271255061,
+        "edge_bbox_iou": 0.9635930588635588
+      }
+    },
+    {
+      "site_id": "THR-ELAHIEH-02",
+      "reference_height_m": 58.0,
+      "one_floor_tolerance_m": 3.3,
+      "height": {
+        "floor_count": {
+          "estimate_m": 56.099999999999994,
+          "absolute_error_m": 1.9000000000000057,
+          "within_one_floor": true
+        },
+        "shadow": {
+          "estimate_m": 56.368051953829465,
+          "absolute_error_m": 1.6319480461705353,
+          "within_one_floor": true
+        }
+      },
+      "footprint": {
+        "threshold_bbox_iou": 0.8177777777777778,
+        "edge_bbox_iou": 0.937736618323723
+      }
+    },
+    {
+      "site_id": "THR-SAADAT-03",
+      "reference_height_m": 24.0,
+      "one_floor_tolerance_m": 3.2,
+      "height": {
+        "floor_count": {
+          "estimate_m": 22.400000000000002,
+          "absolute_error_m": 1.5999999999999979,
+          "within_one_floor": true
+        },
+        "shadow": {
+          "estimate_m": 22.767556553998457,
+          "absolute_error_m": 1.2324434460015432,
+          "within_one_floor": true
+        }
+      },
+      "footprint": {
+        "threshold_bbox_iou": 0.8458149779735683,
+        "edge_bbox_iou": 0.9677698090382786
+      }
+    },
+    {
+      "site_id": "THR-BAZAAR-04",
+      "reference_height_m": 10.5,
+      "one_floor_tolerance_m": 3.5,
+      "height": {
+        "floor_count": {
+          "estimate_m": 10.5,
+          "absolute_error_m": 0.0,
+          "within_one_floor": true
+        },
+        "shadow": {
+          "estimate_m": 9.53402874075368,
+          "absolute_error_m": 0.9659712592463201,
+          "within_one_floor": true
+        }
+      },
+      "footprint": {
+        "threshold_bbox_iou": 0.6636962777313655,
+        "edge_bbox_iou": 0.8945886768845792
+      }
+    },
+    {
+      "site_id": "THR-EKBATAN-05",
+      "reference_height_m": 39.0,
+      "one_floor_tolerance_m": 3.0,
+      "height": {
+        "floor_count": {
+          "estimate_m": 39.0,
+          "absolute_error_m": 0.0,
+          "within_one_floor": true
+        },
+        "shadow": {
+          "estimate_m": 36.46053614083921,
+          "absolute_error_m": 2.53946385916079,
+          "within_one_floor": true
+        }
+      },
+      "footprint": {
+        "threshold_bbox_iou": 0.8515406162464986,
+        "edge_bbox_iou": 0.9508980703998221
+      }
+    }
+  ],
+  "summary": {
+    "height": {
+      "floor_count": {
+        "mae_m": 0.7800000000000011,
+        "within_one_floor_rate": 1.0
+      },
+      "shadow": {
+        "mae_m": 1.3719408204446004,
+        "within_one_floor_rate": 1.0
+      }
+    },
+    "footprint": {
+      "threshold_bbox": {
+        "mean_iou": 0.8106647153709433,
+        "min_iou": 0.6636962777313655
+      },
+      "edge_bbox": {
+        "mean_iou": 0.9429172467019924,
+        "min_iou": 0.8945886768845792
+      }
+    }
+  }
+}

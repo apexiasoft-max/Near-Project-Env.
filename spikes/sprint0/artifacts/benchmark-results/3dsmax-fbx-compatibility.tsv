@@ -1,0 +1,4 @@
+run_id	status	object_count	vertex_count	face_count	size_x_m	size_y_m	size_z_m	message
+RUN-S0-001	pass	1	904895	1473982	21.7101	21.559	48.0	
+RUN-S0-002	pass	1	978800	1493722	28.0441	27.9458	60.0	
+RUN-S0-003	pass	1	841505	1486004	6.9598	7.46659	6.0	

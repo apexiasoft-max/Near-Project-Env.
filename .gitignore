@@ -1,0 +1,26 @@
+# Sprint 0 browser/session safety
+spikes/sprint0/artifacts/browser-traces/**
+spikes/sprint0/artifacts/sanitized-logs/**
+spikes/sprint0/artifacts/provider-samples/**
+!spikes/sprint0/artifacts/**/.gitkeep
+
+# Raw/generated live-service artifacts are kept locally and referenced by manifest.
+spikes/sprint0/artifacts/generated-five-view/**
+!spikes/sprint0/artifacts/generated-five-view/.gitkeep
+spikes/sprint0/artifacts/raw-hunyuan-models/**
+spikes/sprint0/artifacts/normalized-fbx/**
+
+# Local credentials and browser profiles
+.env
+.env.*
+!.env.example
+*.har
+playwright/.auth/
+browser-profile/
+.local/
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/

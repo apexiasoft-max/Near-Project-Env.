@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "contract_version": "2026-07-15.1",
+  "status": "mandatory",
+  "views": ["front", "back", "left", "right", "top"],
+  "appearance": {
+    "facade_materials": "Use realistic colored façade textures and materials inferred from the approved reference images.",
+    "preserve_identity": "Preserve the same building geometry, openings, balconies, massing, material palette, and architectural identity across all five views.",
+    "forbidden_subject_styles": [
+      "white clay render",
+      "gray clay render",
+      "monochrome building",
+      "untextured building",
+      "white-on-white presentation"
+    ]
+  },
+  "background": {
+    "style": "uniform dark neutral gray studio background",
+    "target_rgb": [72, 76, 82],
+    "requirements": [
+      "clear silhouette separation",
+      "no city context",
+      "no sky",
+      "no ground clutter",
+      "no cast shadow that hides the footprint"
+    ]
+  },
+  "camera": {
+    "projection": "orthographic-like",
+    "subject_fill_percent": {
+      "minimum": 65,
+      "maximum": 85
+    },
+    "center_subject": true,
+    "crop_complete_building": true
+  },
+  "prompt_template": "Generate one consistent five-view architectural sheet of the referenced building: FRONT, BACK, LEFT, RIGHT, and TOP. Preserve the real architectural identity and use realistic colored façade textures and materials inferred from the references. Do not produce a white, gray, clay, monochrome, or untextured building. Place every view on a uniform dark neutral-gray studio background (RGB approximately 72,76,82) with strong silhouette separation. Use orthographic-like cameras, center the complete building, keep it uncropped, and make the building occupy 65–85% of each panel. Keep geometry, openings, balconies, massing, materials, and scale mutually consistent across all five views. Do not add sky, streets, vegetation, neighboring buildings, labels, people, vehicles, or ground clutter.",
+  "approval_checks": [
+    "all five required directions exist",
+    "facade is realistically textured and colored",
+    "building is not white, gray, clay, monochrome, or untextured",
+    "background is uniformly dark neutral gray",
+    "building occupies 65–85% of each panel",
+    "complete silhouette is visible and uncropped",
+    "identity and geometry are consistent across views"
+  ]
+}

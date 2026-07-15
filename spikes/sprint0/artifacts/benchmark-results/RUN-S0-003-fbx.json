@@ -1,0 +1,26 @@
+{
+  "input": "spikes\\sprint0\\artifacts\\raw-hunyuan-models\\RUN-S0-003\\RUN-S0-003-raw.glb",
+  "output": "spikes\\sprint0\\artifacts\\normalized-fbx\\RUN-S0-003\\RUN-S0-003-building-6m.fbx",
+  "target_height_m": 6.0,
+  "source_dimensions": {
+    "x": 0.7206109762191772,
+    "y": 0.7730832099914551,
+    "z": 0.6212341785430908
+  },
+  "scale_factor": 9.658193652627277,
+  "normalized_dimensions_m": {
+    "x": 6.959800720214844,
+    "y": 7.466587066650391,
+    "z": 5.999999523162842
+  },
+  "reimported_dimensions_m": {
+    "x": 6.959800720214844,
+    "y": 7.466588020324707,
+    "z": 6.000000476837158
+  },
+  "mesh_objects": 1,
+  "vertices": 841505,
+  "polygons": 1486004,
+  "tolerance_m": 0.01,
+  "verification_passed": true
+}

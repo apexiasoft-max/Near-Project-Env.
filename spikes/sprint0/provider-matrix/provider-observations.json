@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "observed_at": "2026-07-14T00:00:00+03:30",
+  "operator_environment": "Codex in-app browser on Windows",
+  "retention_note": "No provider imagery, cookies, tokens, or session data are stored in this file.",
+  "sites": [
+    {
+      "site_id": "THR-VANAK-01",
+      "name": "Vanak mixed commercial corridor",
+      "latitude": 35.7577,
+      "longitude": 51.4099,
+      "context": ["dense", "mid-rise", "commercial", "street-occlusion"],
+      "expected_building": "A prominent building adjacent to Vanak Square",
+      "observations": [
+        {
+          "provider": "google",
+          "access_state": "accessible",
+          "imagery_types": ["street", "360"],
+          "camera_metadata_visible": [],
+          "attribution_confidence": "medium",
+          "quality": "linear-street-coverage-and-photo-spheres-visible",
+          "failure_modes": ["capture-date-not-reviewed", "building-image-attribution-not-proven"],
+          "evidence_refs": ["live:google-streetview-overlay-vanak-2026-07-14"]
+        },
+        {
+          "provider": "neshan",
+          "access_state": "accessible",
+          "imagery_types": [],
+          "camera_metadata_visible": [],
+          "attribution_confidence": "none",
+          "quality": "map-route-and-360-control-only",
+          "failure_modes": ["360-image-not-selected", "camera-metadata-not-observed"],
+          "evidence_refs": ["live:https://neshan.org/maps/@35.7577,51.4099,18z"]
+        }
+      ]
+    },
+    {
+      "site_id": "THR-ELAHIEH-02",
+      "name": "Elahieh high-rise context",
+      "latitude": 35.8045,
+      "longitude": 51.4252,
+      "context": ["high-rise", "sloped-terrain", "residential"],
+      "expected_building": "A high-rise residential building near the coordinate",
+      "observations": [
+        {
+          "provider": "google",
+          "access_state": "accessible",
+          "imagery_types": [],
+          "camera_metadata_visible": [],
+          "attribution_confidence": "none",
+          "quality": "no-street-path-or-photo-sphere-visible-at-tested-viewport",
+          "failure_modes": ["street-coverage-not-found", "capture-date-not-reviewed"],
+          "evidence_refs": ["live:google-streetview-overlay-elahieh-2026-07-14"]
+        },
+        {
+          "provider": "neshan",
+          "access_state": "accessible",
+          "imagery_types": [],
+          "camera_metadata_visible": [],
+          "attribution_confidence": "none",
+          "quality": "map-route-and-360-control-only",
+          "failure_modes": ["360-image-not-selected", "camera-metadata-not-observed"],
+          "evidence_refs": ["live:https://neshan.org/maps/@35.8045,51.4252,18z"]
+        }
+      ]
+    },
+    {
+      "site_id": "THR-SAADAT-03",
+      "name": "Saadat Abad residential blocks",
+      "latitude": 35.7865,
+      "longitude": 51.3755,
+      "context": ["mid-rise", "residential", "wide-street"],
+      "expected_building": "A mid-rise residential block near the coordinate",
+      "observations": [
+        {
+          "provider": "google",
+          "access_state": "accessible",
+          "imagery_types": ["street"],
+          "camera_metadata_visible": [],
+          "attribution_confidence": "medium",
+          "quality": "linear-street-coverage-visible",
+          "failure_modes": ["capture-date-not-reviewed", "building-image-attribution-not-proven"],
+          "evidence_refs": ["live:google-streetview-overlay-saadat-2026-07-14"]
+        },
+        {
+          "provider": "neshan",
+          "access_state": "accessible",
+          "imagery_types": [],
+          "camera_metadata_visible": [],
+          "attribution_confidence": "none",
+          "quality": "map-route-and-360-control-only",
+          "failure_modes": ["360-image-not-selected", "camera-metadata-not-observed"],
+          "evidence_refs": ["live:https://neshan.org/maps/@35.7865,51.3755,18z"]
+        }
+      ]
+    },
+    {
+      "site_id": "THR-BAZAAR-04",
+      "name": "Grand Bazaar dense historic fabric",
+      "latitude": 35.6759,
+      "longitude": 51.4197,
+      "context": ["historic", "low-rise", "dense", "narrow-street"],
+      "expected_building": "A roof/building footprint within the bazaar fabric",
+      "observations": [
+        {
+          "provider": "google",
+          "access_state": "accessible",
+          "imagery_types": ["360"],
+          "camera_metadata_visible": [],
+          "attribution_confidence": "low",
+          "quality": "photo-spheres-visible-without-clear-linear-street-coverage",
+          "failure_modes": ["fragmented-coverage", "capture-date-not-reviewed", "building-image-attribution-not-proven"],
+          "evidence_refs": ["live:google-streetview-overlay-bazaar-2026-07-14"]
+        },
+        {
+          "provider": "neshan",
+          "access_state": "accessible",
+          "imagery_types": [],
+          "camera_metadata_visible": [],
+          "attribution_confidence": "none",
+          "quality": "map-route-and-360-control-only",
+          "failure_modes": ["360-image-not-selected", "camera-metadata-not-observed"],
+          "evidence_refs": ["live:https://neshan.org/maps/@35.6759,51.4197,18z"]
+        }
+      ]
+    },
+    {
+      "site_id": "THR-EKBATAN-05",
+      "name": "Ekbatan superblock",
+      "latitude": 35.7099,
+      "longitude": 51.313,
+      "context": ["large-footprint", "residential", "repetitive-blocks"],
+      "expected_building": "One identifiable residential block in Ekbatan",
+      "observations": [
+        {
+          "provider": "google",
+          "access_state": "accessible",
+          "imagery_types": ["street", "360"],
+          "camera_metadata_visible": [],
+          "attribution_confidence": "medium",
+          "quality": "linear-street-coverage-and-photo-spheres-visible",
+          "failure_modes": ["capture-date-not-reviewed", "repetitive-block-attribution-risk"],
+          "evidence_refs": ["live:google-streetview-overlay-ekbatan-2026-07-14"]
+        },
+        {
+          "provider": "neshan",
+          "access_state": "accessible",
+          "imagery_types": [],
+          "camera_metadata_visible": [],
+          "attribution_confidence": "none",
+          "quality": "map-route-and-360-control-only",
+          "failure_modes": ["360-image-not-selected", "camera-metadata-not-observed"],
+          "evidence_refs": ["live:https://neshan.org/maps/@35.7099,51.313,18z"]
+        }
+      ]
+    }
+  ]
+}
