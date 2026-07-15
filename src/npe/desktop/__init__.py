@@ -1,0 +1,2 @@
+"""PySide desktop user interface."""
+
