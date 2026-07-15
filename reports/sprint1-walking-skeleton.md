@@ -28,3 +28,14 @@ normalization → metre-scaled FBX.
 The final workstation demonstration must repeat the UI path with a newly submitted Hunyuan job.
 The user action is limited to downloading the completed model; generation of other jobs may continue
 while any job awaits that action.
+
+## Fresh workstation run
+
+- Run ID: `RUN-8B1C4812DC`
+- The packaged desktop application created the project and copied five approved inputs.
+- Hunyuan accepted Front and Back on attempt 1 and Right on attempt 2.
+- Hunyuan rejected Top and Left on both allowed attempts, including the prepared dark-gray
+  high-contrast retry images.
+- The run is flagged for human review before generation. It must not be represented as submitted.
+- The UI now separates `Open Hunyuan` from `Confirm Hunyuan Submission`, preventing a premature
+  `Awaiting Manual Download` transition.

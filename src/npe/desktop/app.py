@@ -83,9 +83,12 @@ def create_window(container: Container) -> Any:
             attach = QPushButton("Approve Five Views")
             attach.clicked.connect(self.attach_views)
             layout.addWidget(attach)
-            submit = QPushButton("Open Hunyuan + Mark Submitted")
-            submit.clicked.connect(self.submit_hunyuan)
-            layout.addWidget(submit)
+            open_hunyuan = QPushButton("Open Hunyuan")
+            open_hunyuan.clicked.connect(self.open_hunyuan)
+            layout.addWidget(open_hunyuan)
+            confirm_submit = QPushButton("Confirm Hunyuan Submission")
+            confirm_submit.clicked.connect(self.confirm_hunyuan_submission)
+            layout.addWidget(confirm_submit)
             download = QPushButton("Register Downloaded Model + Build FBX")
             download.clicked.connect(self.register_model)
             layout.addWidget(download)
@@ -125,13 +128,23 @@ def create_window(container: Container) -> Any:
             except (ValueError, FileNotFoundError) as error:
                 self.job_status.setText(str(error))
 
-        def submit_hunyuan(self) -> None:
+        def open_hunyuan(self) -> None:
+            if self.active_run_id is None:
+                self.job_status.setText("Create a job first")
+                return
+            job = container.workflow.get_job(self.active_run_id)
+            if job.stage.value != "ready_for_hunyuan":
+                self.job_status.setText("Approve five views before opening Hunyuan")
+                return
+            webbrowser.open_new_tab("https://3d.hunyuanglobal.com/")
+            self.job_status.setText(f"{job.run_id}: Hunyuan opened; submission not confirmed")
+
+        def confirm_hunyuan_submission(self) -> None:
             if self.active_run_id is None:
                 self.job_status.setText("Create a job first")
                 return
             try:
                 job = container.workflow.mark_submitted(self.active_run_id)
-                webbrowser.open_new_tab("https://3d.hunyuanglobal.com/")
                 self.job_status.setText(f"{job.run_id}: {job.stage}; other jobs may continue")
             except ValueError as error:
                 self.job_status.setText(str(error))
