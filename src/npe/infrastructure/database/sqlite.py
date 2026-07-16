@@ -92,6 +92,14 @@ MIGRATIONS: tuple[str, ...] = (
         created_at TEXT NOT NULL
     );
     """,
+    """
+    ALTER TABLE buildings ADD COLUMN footprint_json TEXT;
+    ALTER TABLE buildings ADD COLUMN floors INTEGER;
+    ALTER TABLE buildings ADD COLUMN front_bearing_deg REAL;
+    ALTER TABLE buildings ADD COLUMN boundary_intersection INTEGER NOT NULL DEFAULT 0;
+    ALTER TABLE buildings ADD COLUMN inventory_source TEXT;
+    ALTER TABLE buildings ADD COLUMN deleted_at TEXT;
+    """,
 )
 
 

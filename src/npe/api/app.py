@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 
 from npe.bootstrap import Container, bootstrap
 from npe.domain.approval import ApprovalGate
+from npe.domain.inventory import AerialCoverage, FootprintCandidate
 
 
 def create_app(container: Container | None = None) -> Any:
@@ -44,6 +45,21 @@ def create_app(container: Container | None = None) -> Any:
         excluded_building_ids: list[str] = Field(default_factory=list)
         actor: str = Field(min_length=1)
         comment: str = ""
+
+    class InventoryCandidateRequest(BaseModel):
+        polygon: list[tuple[float, float]] = Field(min_length=3)
+        source: str = Field(min_length=1)
+        floors: int | None = Field(default=None, gt=0)
+        height_m: float | None = Field(default=None, gt=0)
+        front_bearing_deg: float | None = Field(default=None, ge=0, lt=360)
+
+    class BuildInventoryRequest(BaseModel):
+        image_path: Path
+        west: float
+        south: float
+        east: float
+        north: float
+        candidates: list[InventoryCandidateRequest]
 
     @app.get("/api/v1/health")
     def health() -> dict[str, object]:
@@ -175,6 +191,44 @@ def create_app(container: Container | None = None) -> Any:
             }
             for event in active.approvals.audit_timeline(project_id)
         ]
+
+    @app.post("/api/v1/projects/{project_id}/inventory")
+    def build_inventory(
+        project_id: str, request: BuildInventoryRequest
+    ) -> dict[str, object]:
+        from fastapi import HTTPException
+
+        coverage = AerialCoverage(
+            request.image_path, request.west, request.south, request.east, request.north
+        )
+        candidates = [
+            FootprintCandidate(
+                tuple(item.polygon), item.source, item.floors,
+                item.height_m, item.front_bearing_deg,
+            )
+            for item in request.candidates
+        ]
+        try:
+            result = active.inventory.build(project_id, coverage, candidates)
+        except KeyError as error:
+            raise HTTPException(status_code=404, detail="Project not found") from error
+        except (ValueError, FileNotFoundError) as error:
+            raise HTTPException(status_code=422, detail=str(error)) from error
+        return {
+            "building_count": len(result.buildings),
+            "original_aerial": str(result.original_aerial),
+            "coded_aerial": str(result.coded_aerial),
+            "geojson": str(result.geojson),
+            "csv": str(result.csv),
+            "buildings": [
+                {
+                    "id": item.id, "code": item.code,
+                    "boundary_intersection": item.boundary_intersection,
+                    "height_m": item.height_m,
+                }
+                for item in result.buildings
+            ],
+        }
 
     return app
 

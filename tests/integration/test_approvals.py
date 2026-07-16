@@ -17,7 +17,9 @@ def project_with_two_buildings(tmp_path: Path) -> tuple[Container, str, str, str
     now = datetime.now(UTC).isoformat()
     with container.database.connect() as connection:
         connection.execute(
-            "INSERT INTO buildings VALUES (?, ?, ?, ?, ?, ?, ?)",
+            """INSERT INTO buildings
+               (id, project_id, code, target_height_m, status, created_at, updated_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?)""",
             (second_id, first.project_id, "B2", 15, "active", now, now),
         )
     return container, first.project_id, first.building_id, second_id

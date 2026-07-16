@@ -78,7 +78,9 @@ class WalkingSkeletonService:
                 ),
             )
             connection.execute(
-                "INSERT INTO buildings VALUES (?, ?, ?, ?, ?, ?, ?)",
+                """INSERT INTO buildings
+                   (id, project_id, code, target_height_m, status, created_at, updated_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?)""",
                 (building_id, project_id, building_code, target_height_m, "active", now, now),
             )
             connection.execute(
