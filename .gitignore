@@ -30,4 +30,6 @@ build/
 dist/
 build-next/
 dist-next/
+build-*/
+dist-*/
 *.egg-info/

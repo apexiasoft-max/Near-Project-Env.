@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import sys
-import webbrowser
 from pathlib import Path
 from typing import Any
 
@@ -86,6 +85,9 @@ def create_window(container: Container) -> Any:
             open_hunyuan = QPushButton("Open Hunyuan")
             open_hunyuan.clicked.connect(self.open_hunyuan)
             layout.addWidget(open_hunyuan)
+            automate_hunyuan = QPushButton("Upload Views + Start Hunyuan")
+            automate_hunyuan.clicked.connect(self.automate_hunyuan)
+            layout.addWidget(automate_hunyuan)
             confirm_submit = QPushButton("Confirm Hunyuan Submission")
             confirm_submit.clicked.connect(self.confirm_hunyuan_submission)
             layout.addWidget(confirm_submit)
@@ -136,8 +138,39 @@ def create_window(container: Container) -> Any:
             if job.stage.value != "ready_for_hunyuan":
                 self.job_status.setText("Approve five views before opening Hunyuan")
                 return
-            webbrowser.open_new_tab("https://3d.hunyuanglobal.com/")
-            self.job_status.setText(f"{job.run_id}: Hunyuan opened; submission not confirmed")
+            try:
+                container.hunyuan.open()
+                self.job_status.setText(
+                    f"{job.run_id}: dedicated Hunyuan browser opened; submission not confirmed"
+                )
+            except RuntimeError as error:
+                self.job_status.setText(str(error))
+
+        def automate_hunyuan(self) -> None:
+            if self.active_run_id is None:
+                self.job_status.setText("Create a job first")
+                return
+            job = container.workflow.get_job(self.active_run_id)
+            if job.stage.value != "ready_for_hunyuan" or job.input_manifest is None:
+                self.job_status.setText("Approve five views before Hunyuan upload")
+                return
+            try:
+                result = container.hunyuan.submit(
+                    job.run_id, job.input_manifest.parent, minimum_views=3
+                )
+                if not result.generation_started:
+                    self.job_status.setText(
+                        f"{job.run_id}: {result.failure_code}; "
+                        f"accepted {result.accepted_views}/5"
+                    )
+                    return
+                job = container.workflow.mark_submitted(job.run_id)
+                self.job_status.setText(
+                    f"{job.run_id}: generation started with "
+                    f"{result.accepted_views}/5 views; {job.stage}"
+                )
+            except (FileNotFoundError, RuntimeError, ValueError) as error:
+                self.job_status.setText(str(error))
 
         def confirm_hunyuan_submission(self) -> None:
             if self.active_run_id is None:

@@ -54,3 +54,15 @@ while any job awaits that action.
   919,078 vertices and 1,418,930 polygons. Verification passed.
 - Final workstation artifact:
   `C:/ProgramData/NearProjectEnvironment/projects/PRJ-AF5534DC/buildings/BLD-214CDF32/models/final/RUN-8B1C4812DC.fbx`
+
+## In-application Hunyuan adapter
+
+- The desktop application now owns a persistent-profile Playwright adapter and exposes
+  `Upload Views + Start Hunyuan`.
+- The adapter maps five approved directional files to the known Hunyuan slots, records detection
+  failures, starts generation when at least three views are accepted, and saves sanitized JSON and
+  screenshot evidence by Run ID.
+- The packaged Windows runtime was rebuilt successfully and passed its worker smoke test.
+- Live adapter run `RUN-ADAPTER-LIVE-001` reached Hunyuan but was redirected to Login because the
+  dedicated application profile has no authenticated session. Login is the remaining external gate;
+  credentials and cookies are not copied from the user's regular Chrome profile.

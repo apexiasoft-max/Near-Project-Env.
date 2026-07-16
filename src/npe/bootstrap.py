@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from npe.application.health import HealthService
 from npe.application.workflow import WalkingSkeletonService
 from npe.infrastructure.database import Database
+from npe.infrastructure.hunyuan_browser import HunyuanBrowserAdapter
 from npe.shared.config import Settings, load_settings
 
 
@@ -16,6 +17,7 @@ class Container:
     database: Database
     health: HealthService
     workflow: WalkingSkeletonService
+    hunyuan: HunyuanBrowserAdapter
 
 
 def bootstrap(settings: Settings | None = None) -> Container:
@@ -26,5 +28,5 @@ def bootstrap(settings: Settings | None = None) -> Container:
     database.migrate()
     return Container(
         active, database, HealthService(active, database),
-        WalkingSkeletonService(active, database),
+        WalkingSkeletonService(active, database), HunyuanBrowserAdapter(active),
     )
