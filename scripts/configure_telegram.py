@@ -6,7 +6,6 @@ import json
 import sys
 import urllib.error
 import urllib.request
-import winreg
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
@@ -16,6 +15,11 @@ from PySide6.QtWidgets import (
     QPushButton,
     QVBoxLayout,
     QWidget,
+)
+
+from npe.infrastructure.credential_store import (
+    TELEGRAM_TOKEN_TARGET,
+    WindowsCredentialStore,
 )
 
 
@@ -50,7 +54,7 @@ class TelegramSetup(QWidget):
             if chat_id is None:
                 self.status.setText("No /start message found. Send /start and try again.")
                 return
-            save_user_environment("NPE_TELEGRAM_BOT_TOKEN", token)
+            WindowsCredentialStore().write(TELEGRAM_TOKEN_TARGET, token)
             save_user_environment("NPE_TELEGRAM_CHAT_ID", chat_id)
             self.token.clear()
             self.status.setText(
@@ -83,6 +87,8 @@ def discover_chat_id(token: str) -> str | None:
 
 
 def save_user_environment(name: str, value: str) -> None:
+    import winreg
+
     with winreg.OpenKey(
         winreg.HKEY_CURRENT_USER,
         "Environment",

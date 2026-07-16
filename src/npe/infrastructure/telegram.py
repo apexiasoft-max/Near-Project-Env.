@@ -47,17 +47,25 @@ class TelegramNotifier:
                    JOIN buildings b ON b.id = i.building_id
                    JOIN projects p ON p.id = i.project_id
                    WHERE i.channel = 'telegram' AND i.status = 'pending'
+                     AND i.notify_attempts < 2
                    ORDER BY i.created_at"""
             ).fetchall()
         sent = 0
         failed = 0
         for row in rows:
+            status = {
+                "missing_reference": "MissingReference",
+                "needs_review": "NeedsReview",
+                "captcha": "Captcha/Login intervention",
+                "approval_ready": "Approval ready",
+                "completed": "Completed",
+            }.get(str(row["kind"]), str(row["kind"]))
             text = (
                 "Near Project Environment\n"
                 f"Project: {row['project_name']}\n"
                 f"Building: {row['code']}\n"
-                "Status: MissingReference\n"
-                "Action: open the project and approve or upload a reference."
+                f"Status: {status}\n"
+                "Action: open the project dashboard for details."
             )
             try:
                 response = self.transport(
@@ -66,16 +74,34 @@ class TelegramNotifier:
                 if response.get("ok") is not True:
                     raise RuntimeError("Telegram returned an unsuccessful response")
             except (OSError, RuntimeError, ValueError):
+                with self.database.connect() as connection:
+                    connection.execute(
+                        """UPDATE intervention_events
+                           SET notify_attempts = notify_attempts + 1,
+                               last_notify_error = 'telegram_delivery_failed'
+                           WHERE id = ? AND status = 'pending'""",
+                        (str(row["id"]),),
+                    )
                 failed += 1
                 continue
             with self.database.connect() as connection:
                 connection.execute(
-                    """UPDATE intervention_events SET status = 'notified', notified_at = ?
+                    """UPDATE intervention_events SET status = 'notified', notified_at = ?,
+                       notify_attempts = notify_attempts + 1, last_notify_error = NULL
                        WHERE id = ? AND status = 'pending'""",
                     (self._utc_now(), str(row["id"])),
                 )
             sent += 1
         return TelegramDeliveryResult(sent, failed)
+
+    def send_test_message(self) -> bool:
+        if not self.configured:
+            return False
+        response = self.transport(
+            "sendMessage",
+            {"chat_id": str(self.chat_id), "text": "Near Project Environment: test OK"},
+        )
+        return response.get("ok") is True
 
     def discover_chat_id(self) -> str | None:
         if not self.token:
@@ -117,4 +143,3 @@ class TelegramNotifier:
         from datetime import UTC, datetime
 
         return datetime.now(UTC).isoformat()
-

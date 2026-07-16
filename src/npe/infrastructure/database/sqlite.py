@@ -221,6 +221,10 @@ MIGRATIONS: tuple[str, ...] = (
         expires_at REAL NOT NULL
     );
     """,
+    """
+    ALTER TABLE intervention_events ADD COLUMN notify_attempts INTEGER NOT NULL DEFAULT 0;
+    ALTER TABLE intervention_events ADD COLUMN last_notify_error TEXT;
+    """,
 )
 
 

@@ -19,6 +19,7 @@ from npe.application.references import ReferenceService
 from npe.application.reliability import ProviderLockService, RetryExecutor
 from npe.application.workflow import WalkingSkeletonService
 from npe.infrastructure.chatgpt_browser import ChatGPTBrowserAdapter
+from npe.infrastructure.credential_store import TELEGRAM_TOKEN_TARGET, WindowsCredentialStore
 from npe.infrastructure.database import Database
 from npe.infrastructure.hunyuan_browser import HunyuanBrowserAdapter
 from npe.infrastructure.telegram import TelegramNotifier
@@ -54,6 +55,9 @@ def bootstrap(settings: Settings | None = None) -> Container:
     database = Database(active.paths.database)
     database.migrate()
     health = HealthService(active, database)
+    telegram_token = active.telegram_bot_token or WindowsCredentialStore().read(
+        TELEGRAM_TOKEN_TARGET
+    )
     return Container(
         active, database, health, WalkingSkeletonService(active, database),
         HunyuanBrowserAdapter(active), ProjectLifecycleService(database, health),
@@ -64,7 +68,7 @@ def bootstrap(settings: Settings | None = None) -> Container:
         ManualPoolService(active, database),
         ReferenceReviewService(database, approvals),
         TelegramNotifier(
-            database, active.telegram_bot_token, active.telegram_chat_id
+            database, telegram_token, active.telegram_chat_id
         ),
         FiveViewGenerationService(
             active,
