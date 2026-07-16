@@ -23,9 +23,21 @@ as `neshan-candidate-unavailable.png` and is classified as **MissingReference**.
 - MissingReference creates an independent pending Telegram intervention event.
 - Other buildings remain processable.
 
+## Product Owner variance
+
+On 2026-07-16 the Product Owner directed the MVP to continue with Google while
+Neshan 360 is unavailable. Neshan remains an explicit unavailable observation;
+it is not removed from the provider contract and receives no synthetic image.
+
+## Verified Google evidence
+
+The user opened a real Google Street View panorama at camera coordinates
+35.784297, 51.3741911. The URL exposes heading 241.14°, a 75° view, panorama ID
+`CIHM0ogKEICAgICRlNCugQE`, and the page shows capture date March 2023. The facade
+is dominant and clear with minor pole/wire occlusion. The retained evidence is
+`google-verified-streetview.png`.
+
 ## Gate status
 
-Conditional. Deterministic provider-neutral ranking, manual fallback, approval and
-resume are implemented. The live Gate still requires one verified building-level
-candidate from each provider, or explicit Product Owner acceptance that a provider
-with no coverage is represented by an unavailable observation rather than an image.
+Go with Google-only Product Owner variance. Manual fallback, MissingReference,
+reference approval and independent resume remain mandatory and are demonstrated.
