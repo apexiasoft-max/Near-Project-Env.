@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from npe.infrastructure.hunyuan_browser import HunyuanBrowserAdapter
+from npe.infrastructure.hunyuan_browser import HunyuanBrowserAdapter, classify_hunyuan_state
 from npe.shared.config import AppPaths, Settings
 
 
@@ -30,3 +30,19 @@ def test_view_files_accepts_supported_directional_extensions(tmp_path: Path) -> 
 def test_submit_rejects_invalid_minimum_before_opening_browser(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="between 1 and 5"):
         adapter_at(tmp_path / "data").submit("RUN-1", tmp_path, minimum_views=0)
+
+
+@pytest.mark.parametrize(
+    ("url", "body", "expected"),
+    [
+        ("https://3d.hunyuanglobal.com/login", "", ("intervention", "logout")),
+        ("https://3d.hunyuanglobal.com/", "Verify you are human", ("intervention", "captcha")),
+        ("https://3d.hunyuanglobal.com/", "Model generating", ("processing", None)),
+        ("https://3d.hunyuanglobal.com/", "Download FBX", ("completed", None)),
+        ("https://3d.hunyuanglobal.com/", "Task failed", ("failed", "provider_failed")),
+    ],
+)
+def test_provider_state_classification(
+    url: str, body: str, expected: tuple[str, str | None]
+) -> None:
+    assert classify_hunyuan_state(url, body) == expected

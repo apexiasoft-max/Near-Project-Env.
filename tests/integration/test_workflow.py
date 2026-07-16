@@ -38,7 +38,7 @@ def test_end_to_end_job_survives_restart(tmp_path: Path) -> None:
     restarted = bootstrap(settings_at(tmp_path / "data"))
     assert restarted.workflow.get_job(job.run_id).stage == JobStage.AWAITING_MANUAL_DOWNLOAD
     raw = tmp_path / "download.fbx"
-    raw.write_bytes(b"fbx")
+    raw.write_bytes(b"fbx-fixture-content")
     restarted.workflow.register_download(job.run_id, raw)
     complete = restarted.workflow.normalize(job.run_id, FakeNormalizer())
     assert complete.stage == JobStage.COMPLETED

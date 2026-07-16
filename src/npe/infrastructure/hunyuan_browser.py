@@ -28,6 +28,15 @@ class HunyuanSubmission:
     screenshot: Path
 
 
+@dataclass(frozen=True)
+class HunyuanProgress:
+    run_id: str
+    status: str
+    failure_code: str | None
+    recorded_at: str
+    evidence_json: Path
+
+
 class HunyuanBrowserAdapter:
     """Own the minimum browser behavior needed by the Sprint 1 walking skeleton."""
 
@@ -89,6 +98,22 @@ class HunyuanBrowserAdapter:
         failure_code = None if started else "insufficient_accepted_views"
         return self._write_evidence(page, run_id, accepted, failures, started, failure_code)
 
+    def poll(self, run_id: str) -> HunyuanProgress:
+        page = self.open()
+        self._raise_session_failure(page)
+        body = page.locator("body").inner_text()
+        status, failure_code = classify_hunyuan_state(page.url, body)
+        root = self.settings.paths.browser_traces / run_id
+        root.mkdir(parents=True, exist_ok=True)
+        evidence = root / "progress.json"
+        progress = HunyuanProgress(
+            run_id, status, failure_code, datetime.now(UTC).isoformat(), evidence
+        )
+        payload = asdict(progress)
+        payload["evidence_json"] = str(evidence)
+        evidence.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+        return progress
+
     def _hunyuan_page(self) -> Page:
         assert self._context is not None
         for page in self._context.pages:
@@ -145,3 +170,22 @@ class HunyuanBrowserAdapter:
         payload["screenshot"] = str(screenshot)
         evidence.write_text(json.dumps(payload, indent=2), encoding="utf-8")
         return result
+
+
+def classify_hunyuan_state(url: str, body: str) -> tuple[str, str | None]:
+    """Classify visible provider state without leaking page/session data."""
+    normalized = body.casefold()
+    lowered_url = url.casefold()
+    if any(token in lowered_url for token in ("login", "signin", "sign-in")):
+        return "intervention", "logout"
+    if "captcha" in normalized or "verify you are human" in normalized:
+        return "intervention", "captcha"
+    if "send verification code is restricted" in normalized:
+        return "intervention", "verification_throttled"
+    if any(token in normalized for token in ("generation failed", "task failed")):
+        return "failed", "provider_failed"
+    if any(token in normalized for token in ("download fbx", "download model", "completed")):
+        return "completed", None
+    if any(token in normalized for token in ("generating", "processing", "in queue")):
+        return "processing", None
+    return "unknown", "unrecognized_state"

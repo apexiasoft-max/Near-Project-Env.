@@ -127,7 +127,27 @@ class WalkingSkeletonService:
             raise ValueError("Downloaded model must be FBX, GLB, or GLTF")
         target = self._building_root(job) / "models" / "raw" / source.name
         target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(source, target)
+        partial = target.with_name(f"{target.name}.partial")
+        shutil.copy2(source, partial)
+        if partial.stat().st_size < 16:
+            partial.unlink(missing_ok=True)
+            raise ValueError("Downloaded model is empty or incomplete")
+        partial.replace(target)
+        receipt = target.with_suffix(f"{target.suffix}.receipt.json")
+        receipt.write_text(
+            json.dumps(
+                {
+                    "run_id": run_id,
+                    "source_name": source.name,
+                    "size_bytes": target.stat().st_size,
+                    "sha256": hashlib.sha256(target.read_bytes()).hexdigest(),
+                    "registered_at": datetime.now(UTC).isoformat(),
+                    "capture_mode": "manual_download",
+                },
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
         self._transition(run_id, JobStage.NORMALIZING, downloaded_model_path=target)
         return self.get_job(run_id)
 

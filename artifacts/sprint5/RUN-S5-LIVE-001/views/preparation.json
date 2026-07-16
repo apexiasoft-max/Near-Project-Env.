@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "method": "square-pad-v1",
+  "appearance_changed": false,
+  "outputs": {
+    "front": {
+      "source": "artifacts\\sprint4\\RUN-S4-LIVE-001\\views\\front.png",
+      "output": "artifacts\\sprint5\\RUN-S5-LIVE-001\\views\\front.png",
+      "size": [
+        881,
+        881
+      ],
+      "offset": [
+        266,
+        0
+      ]
+    },
+    "back": {
+      "source": "artifacts\\sprint4\\RUN-S4-LIVE-001\\views\\back.png",
+      "output": "artifacts\\sprint5\\RUN-S5-LIVE-001\\views\\back.png",
+      "size": [
+        881,
+        881
+      ],
+      "offset": [
+        266,
+        0
+      ]
+    },
+    "left": {
+      "source": "artifacts\\sprint4\\RUN-S4-LIVE-001\\views\\left.png",
+      "output": "artifacts\\sprint5\\RUN-S5-LIVE-001\\views\\left.png",
+      "size": [
+        881,
+        881
+      ],
+      "offset": [
+        266,
+        0
+      ]
+    },
+    "right": {
+      "source": "artifacts\\sprint4\\RUN-S4-LIVE-001\\views\\right.png",
+      "output": "artifacts\\sprint5\\RUN-S5-LIVE-001\\views\\right.png",
+      "size": [
+        881,
+        881
+      ],
+      "offset": [
+        266,
+        0
+      ]
+    },
+    "top": {
+      "source": "artifacts\\sprint4\\RUN-S4-LIVE-001\\views\\top.png",
+      "output": "artifacts\\sprint5\\RUN-S5-LIVE-001\\views\\top.png",
+      "size": [
+        881,
+        881
+      ],
+      "offset": [
+        266,
+        0
+      ]
+    }
+  }
+}

@@ -40,3 +40,4 @@ artifacts/**/runtime/app.db*
 # Live provider outputs stay local; sanitized manifests/reports may be committed.
 artifacts/sprint4/**/original-sheet.png
 artifacts/sprint4/**/views/*.png
+artifacts/sprint5/**/views/*.png

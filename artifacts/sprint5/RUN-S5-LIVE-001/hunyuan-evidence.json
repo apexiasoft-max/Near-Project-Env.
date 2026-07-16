@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "run_id": "RUN-S5-LIVE-001",
+  "provider": "hunyuan-global-web",
+  "status": "needs_review",
+  "direction_mapping": {
+    "top": 0,
+    "front": 2,
+    "left": 4,
+    "right": 5,
+    "back": 6
+  },
+  "attempts": [
+    {
+      "attempt": 1,
+      "preparation": "original directional crops",
+      "accepted": ["top", "back"],
+      "detection_failed": ["front", "left", "right"]
+    },
+    {
+      "attempt": 2,
+      "preparation": "square-pad-v1; appearance unchanged",
+      "accepted": ["left"],
+      "detection_failed": ["front", "right", "back"],
+      "top_result": "not confirmed"
+    }
+  ],
+  "retry_policy": {
+    "maximum_attempts": 2,
+    "attempts_used": 2,
+    "terminal_action": "needs_review"
+  },
+  "download_mode": "manual_by_product_owner_decision",
+  "sensitive_data_included": false
+}
