@@ -57,6 +57,7 @@ class Settings:
     blender_path: Path | None = None
     telegram_bot_token: str | None = None
     telegram_chat_id: str | None = None
+    telegram_proxy_url: str | None = None
 
     def validate(self) -> None:
         if self.api_host not in LOOPBACK_HOSTS:
@@ -84,6 +85,7 @@ def load_settings() -> Settings:
         blender_path=Path(blender) if blender else None,
         telegram_bot_token=os.environ.get("NPE_TELEGRAM_BOT_TOKEN"),
         telegram_chat_id=os.environ.get("NPE_TELEGRAM_CHAT_ID"),
+        telegram_proxy_url=os.environ.get("NPE_TELEGRAM_PROXY_URL"),
     )
     settings.validate()
     return settings

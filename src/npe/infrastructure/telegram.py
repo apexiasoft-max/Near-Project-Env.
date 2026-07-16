@@ -27,10 +27,12 @@ class TelegramNotifier:
         token: str | None,
         chat_id: str | None,
         transport: TelegramTransport | None = None,
+        proxy_url: str | None = None,
     ) -> None:
         self.database = database
         self.token = token
         self.chat_id = chat_id
+        self.proxy_url = proxy_url
         self.transport = transport or self._request
 
     @property
@@ -130,7 +132,13 @@ class TelegramNotifier:
             method="POST",
         )
         try:
-            with urllib.request.urlopen(request, timeout=20) as response:
+            opener = urllib.request.build_opener(
+                urllib.request.ProxyHandler(
+                    {"http": self.proxy_url, "https": self.proxy_url}
+                    if self.proxy_url else {}
+                )
+            )
+            with opener.open(request, timeout=20) as response:
                 value = json.loads(response.read().decode())
         except (urllib.error.URLError, json.JSONDecodeError) as error:
             raise OSError("Telegram request failed; credentials were redacted") from error

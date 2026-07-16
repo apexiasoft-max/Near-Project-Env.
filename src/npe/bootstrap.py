@@ -68,7 +68,8 @@ def bootstrap(settings: Settings | None = None) -> Container:
         ManualPoolService(active, database),
         ReferenceReviewService(database, approvals),
         TelegramNotifier(
-            database, telegram_token, active.telegram_chat_id
+            database, telegram_token, active.telegram_chat_id,
+            proxy_url=active.telegram_proxy_url,
         ),
         FiveViewGenerationService(
             active,
