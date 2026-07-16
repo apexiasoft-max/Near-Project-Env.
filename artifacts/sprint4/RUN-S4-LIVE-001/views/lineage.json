@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "layout_version": "horizontal-five-v1",
+  "generation_attempt": 1,
+  "source_sheet": "artifacts\\sprint4\\RUN-S4-LIVE-001\\original-sheet.png",
+  "source_sheet_sha256": "d608a17fba64ff3a9425be0fb8650645910f8366ba1bdfc5132be1f5d5f0d286",
+  "source_manifest": "artifacts\\sprint4\\RUN-S4-LIVE-001\\evidence.json",
+  "source_manifest_sha256": "fd7351decb880c9488bc4ef2183890473b0cdeea4132730e96004459e05e874f",
+  "directions": [
+    "front",
+    "back",
+    "left",
+    "right",
+    "top"
+  ],
+  "outputs": {
+    "front": {
+      "path": "artifacts\\sprint4\\RUN-S4-LIVE-001\\views\\front.png",
+      "width_px": 349,
+      "height_px": 881,
+      "sha256": "c1c1fbb7866b9a02ec53f009c1c020fed8fca3215934110357dec77ace337681"
+    },
+    "back": {
+      "path": "artifacts\\sprint4\\RUN-S4-LIVE-001\\views\\back.png",
+      "width_px": 349,
+      "height_px": 881,
+      "sha256": "129b0b2037959f075248eec2b830c3def29aa8818ec8d1eaf0bb3bdb01b1dc11"
+    },
+    "left": {
+      "path": "artifacts\\sprint4\\RUN-S4-LIVE-001\\views\\left.png",
+      "width_px": 348,
+      "height_px": 881,
+      "sha256": "2b7484248fc6be9777b3a745354e04feaf7daa3e25ded330ed07d1deb42bd563"
+    },
+    "right": {
+      "path": "artifacts\\sprint4\\RUN-S4-LIVE-001\\views\\right.png",
+      "width_px": 349,
+      "height_px": 881,
+      "sha256": "4fe12cc4a427a1a828303a8a61d0b99cb05ea8ea080ac995ddb566c6f7f3587f"
+    },
+    "top": {
+      "path": "artifacts\\sprint4\\RUN-S4-LIVE-001\\views\\top.png",
+      "width_px": 349,
+      "height_px": 881,
+      "sha256": "452100a8db684f2d5f7331b7ab7a7ff8cae2b00c4c1d25ef67b35d718f87219c"
+    }
+  }
+}
