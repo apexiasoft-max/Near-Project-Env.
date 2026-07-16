@@ -195,6 +195,24 @@ MIGRATIONS: tuple[str, ...] = (
         PRIMARY KEY(attempt_id, direction)
     );
     """,
+    """
+    ALTER TABLE jobs ADD COLUMN correlation_id TEXT;
+    ALTER TABLE jobs ADD COLUMN last_error TEXT;
+    CREATE TABLE stage_attempts (
+        id TEXT PRIMARY KEY,
+        job_id TEXT NOT NULL REFERENCES jobs(id),
+        run_id TEXT NOT NULL,
+        stage TEXT NOT NULL,
+        attempt INTEGER NOT NULL,
+        status TEXT NOT NULL,
+        correlation_id TEXT NOT NULL,
+        detail_json TEXT NOT NULL,
+        started_at TEXT NOT NULL,
+        finished_at TEXT,
+        UNIQUE(job_id, stage, attempt)
+    );
+    CREATE INDEX idx_stage_attempts_running ON stage_attempts(status, started_at);
+    """,
 )
 
 

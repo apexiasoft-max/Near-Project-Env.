@@ -84,9 +84,15 @@ class WalkingSkeletonService:
                 (building_id, project_id, building_code, target_height_m, "active", now, now),
             )
             connection.execute(
-                "INSERT INTO jobs VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (job_id, project_id, building_id, run_id, JobStage.AWAITING_VIEWS,
-                 "active", None, None, None, now, now),
+                """INSERT INTO jobs
+                   (id, project_id, building_id, run_id, stage, status, input_manifest,
+                    downloaded_model_path, final_fbx_path, created_at, updated_at,
+                    correlation_id, last_error)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (
+                    job_id, project_id, building_id, run_id, JobStage.AWAITING_VIEWS,
+                    "active", None, None, None, now, now, run_id, None,
+                ),
             )
         return self.get_job(run_id)
 

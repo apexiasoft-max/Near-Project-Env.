@@ -13,6 +13,7 @@ from npe.application.height import HeightService
 from npe.application.inventory import InventoryService
 from npe.application.manual_pool import ManualPoolService
 from npe.application.project_lifecycle import ProjectLifecycleService
+from npe.application.recovery import WorkflowRecoveryService
 from npe.application.reference_review import ReferenceReviewService
 from npe.application.references import ReferenceService
 from npe.application.workflow import WalkingSkeletonService
@@ -40,6 +41,7 @@ class Container:
     telegram: TelegramNotifier
     five_view_generation: FiveViewGenerationService
     five_view_review: FiveViewReviewService
+    recovery: WorkflowRecoveryService
 
 
 def bootstrap(settings: Settings | None = None) -> Container:
@@ -67,4 +69,5 @@ def bootstrap(settings: Settings | None = None) -> Container:
             lambda: f"RUN-{uuid4().hex[:12].upper()}",
         ),
         FiveViewReviewService(database),
+        WorkflowRecoveryService(database),
     )
