@@ -153,6 +153,21 @@ MIGRATIONS: tuple[str, ...] = (
         UNIQUE(project_id, sha256)
     );
     """,
+    """
+    ALTER TABLE reference_candidates ADD COLUMN selected INTEGER NOT NULL DEFAULT 0;
+    ALTER TABLE reference_candidates ADD COLUMN rejected INTEGER NOT NULL DEFAULT 0;
+    CREATE TABLE intervention_events (
+        id TEXT PRIMARY KEY,
+        project_id TEXT NOT NULL REFERENCES projects(id),
+        building_id TEXT NOT NULL REFERENCES buildings(id),
+        kind TEXT NOT NULL,
+        channel TEXT NOT NULL,
+        payload_json TEXT NOT NULL,
+        status TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        resolved_at TEXT
+    );
+    """,
 )
 
 
