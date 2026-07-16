@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "layout_version": "four-plus-top-v1",
+  "generation_attempt": 1,
+  "source_sheet": "artifacts\\sprint5\\RUN-S5-LIVE-002\\five-view-sheet.png",
+  "source_sheet_sha256": "6a6435f49548709ee982b9233af117e6ca31e704510f0873213ae59230401748",
+  "source_manifest": "artifacts\\sprint5\\RUN-S5-LIVE-002\\input-manifest.json",
+  "source_manifest_sha256": "6e94946be786a635c2882cf70ac235b7955a85e8b18bc770dfb6f53676839d43",
+  "directions": [
+    "front",
+    "back",
+    "left",
+    "right",
+    "top"
+  ],
+  "outputs": {
+    "front": {
+      "path": "artifacts\\sprint5\\RUN-S5-LIVE-002\\views\\front.png",
+      "width_px": 400,
+      "height_px": 653,
+      "sha256": "80a5f2c5cff79cdf123c9af13cec69b5a27b77f7ee20233b9a61a374077b8cfb"
+    },
+    "back": {
+      "path": "artifacts\\sprint5\\RUN-S5-LIVE-002\\views\\back.png",
+      "width_px": 399,
+      "height_px": 653,
+      "sha256": "010cc5e526feab37c3777cfd73039ed3ea07788ccc119b9de565e18f09d06afb"
+    },
+    "left": {
+      "path": "artifacts\\sprint5\\RUN-S5-LIVE-002\\views\\left.png",
+      "width_px": 399,
+      "height_px": 653,
+      "sha256": "0fe0ebcdaacd11e4e8d48350037a7e56b9f099e584b19105d875aae8637f0f86"
+    },
+    "right": {
+      "path": "artifacts\\sprint5\\RUN-S5-LIVE-002\\views\\right.png",
+      "width_px": 400,
+      "height_px": 653,
+      "sha256": "bc2261b45d1539e654699f7c7d47b56f79c769c9efc886091ee85fc59ee5e9b4"
+    },
+    "top": {
+      "path": "artifacts\\sprint5\\RUN-S5-LIVE-002\\views\\top.png",
+      "width_px": 746,
+      "height_px": 307,
+      "sha256": "774bff94949bea7ed3c1f80f19246b9a193a3792a435ad9fb9204b0ff9d219ba"
+    }
+  }
+}

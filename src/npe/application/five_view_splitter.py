@@ -13,6 +13,7 @@ from PIL import Image, ImageStat, UnidentifiedImageError
 from npe.domain.five_view import REQUIRED_DIRECTIONS
 
 LAYOUT_VERSION = "horizontal-five-v1"
+FOUR_PLUS_TOP_LAYOUT = "four-plus-top-v1"
 
 
 @dataclass(frozen=True)
@@ -28,7 +29,7 @@ class FiveViewSplitter:
 
     def split(
         self, sheet_path: Path, output_dir: Path, source_manifest: Path,
-        generation_attempt: int,
+        generation_attempt: int, layout_version: str = LAYOUT_VERSION,
     ) -> SplitResult:
         if generation_attempt <= 0:
             raise ValueError("Generation attempt must be positive")
@@ -39,15 +40,33 @@ class FiveViewSplitter:
                 sheet = source.convert("RGB")
         except (UnidentifiedImageError, OSError) as error:
             raise ValueError(f"Invalid five-view sheet: {error}") from error
-        if sheet.width < self.minimum_width * 5 or sheet.height < self.minimum_height:
-            raise ValueError("Sheet is below minimum dimensions for five valid views")
+        if layout_version == LAYOUT_VERSION:
+            if sheet.width < self.minimum_width * 5 or sheet.height < self.minimum_height:
+                raise ValueError("Sheet is below minimum dimensions for five valid views")
+            boxes = [
+                (round(index * sheet.width / 5) + 3, 3,
+                 round((index + 1) * sheet.width / 5) - 3, sheet.height - 3)
+                for index in range(5)
+            ]
+        elif layout_version == FOUR_PLUS_TOP_LAYOUT:
+            if (sheet.width < self.minimum_width * 4
+                    or sheet.height < self.minimum_height * 2):
+                raise ValueError("Sheet is below minimum dimensions for four-plus-top layout")
+            row_end = round(sheet.height * 0.68)
+            boxes = [
+                (round(index * sheet.width / 4) + 3, 3,
+                 round((index + 1) * sheet.width / 4) - 3, row_end - 3)
+                for index in range(4)
+            ]
+            boxes.append((round(sheet.width * 0.27), row_end,
+                          round(sheet.width * 0.73), sheet.height - 3))
+        else:
+            raise ValueError(f"Unsupported five-view layout: {layout_version}")
         output_dir.mkdir(parents=True, exist_ok=True)
         views: dict[str, Path] = {}
         output_evidence: dict[str, dict[str, object]] = {}
-        for index, direction in enumerate(REQUIRED_DIRECTIONS):
-            left = round(index * sheet.width / 5) + 3
-            right = round((index + 1) * sheet.width / 5) - 3
-            view = sheet.crop((left, 3, right, sheet.height - 3))
+        for direction, box in zip(REQUIRED_DIRECTIONS, boxes, strict=True):
+            view = sheet.crop(box)
             self._validate_view(direction, view)
             path = output_dir / f"{direction}.png"
             view.save(path, format="PNG")
@@ -61,7 +80,7 @@ class FiveViewSplitter:
         lineage_path = output_dir / "lineage.json"
         lineage = {
             "schema_version": 1,
-            "layout_version": LAYOUT_VERSION,
+            "layout_version": layout_version,
             "generation_attempt": generation_attempt,
             "source_sheet": str(sheet_path),
             "source_sheet_sha256": _sha256(sheet_path),

@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 from PIL import Image, ImageDraw
 
-from npe.application.five_view_splitter import FiveViewSplitter
+from npe.application.five_view_splitter import FOUR_PLUS_TOP_LAYOUT, FiveViewSplitter
 
 
 def make_sheet(path: Path) -> None:
@@ -62,3 +62,24 @@ def test_split_rejects_empty_panel(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="no meaningful content"):
         FiveViewSplitter().split(sheet, tmp_path / "views", manifest, 1)
+
+
+def test_split_supports_four_views_above_top_layout(tmp_path: Path) -> None:
+    sheet = tmp_path / "sheet.png"
+    image = Image.new("RGB", (1600, 1000), "#30343b")
+    draw = ImageDraw.Draw(image)
+    for index in range(4):
+        draw.rectangle((index * 400 + 80, 60, index * 400 + 320, 640), fill="tan")
+    draw.ellipse((550, 720, 1050, 950), fill="tan")
+    image.save(sheet)
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text("{}", encoding="utf-8")
+
+    result = FiveViewSplitter().split(
+        sheet, tmp_path / "views", manifest, 2, FOUR_PLUS_TOP_LAYOUT
+    )
+
+    assert set(result.views) == {"front", "back", "left", "right", "top"}
+    lineage = json.loads(result.lineage_path.read_text(encoding="utf-8"))
+    assert lineage["layout_version"] == FOUR_PLUS_TOP_LAYOUT
+    assert lineage["generation_attempt"] == 2

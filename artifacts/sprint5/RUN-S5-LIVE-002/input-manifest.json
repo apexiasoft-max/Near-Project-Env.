@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "run_id": "RUN-S5-LIVE-002",
+  "source_reference": "spikes/sprint0/fixtures/building-references/building-002.jpg.jpeg",
+  "generator": "built-in-imagegen",
+  "requirements": {
+    "real_facade_texture": true,
+    "background": "uniform dark charcoal gray",
+    "complete_uncropped_building": true,
+    "no_panel_separators": true
+  },
+  "layout_version": "four-plus-top-v1"
+}
