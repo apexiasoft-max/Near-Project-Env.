@@ -171,6 +171,30 @@ MIGRATIONS: tuple[str, ...] = (
     """
     ALTER TABLE intervention_events ADD COLUMN notified_at TEXT;
     """,
+    """
+    CREATE TABLE five_view_attempts (
+        id TEXT PRIMARY KEY,
+        project_id TEXT NOT NULL REFERENCES projects(id),
+        building_id TEXT NOT NULL REFERENCES buildings(id),
+        run_id TEXT NOT NULL,
+        version INTEGER NOT NULL,
+        parent_attempt_id TEXT REFERENCES five_view_attempts(id),
+        status TEXT NOT NULL,
+        guidance_json TEXT NOT NULL,
+        lineage_path TEXT,
+        created_at TEXT NOT NULL,
+        UNIQUE(building_id, version)
+    );
+    CREATE TABLE five_view_outputs (
+        attempt_id TEXT NOT NULL REFERENCES five_view_attempts(id),
+        direction TEXT NOT NULL,
+        image_path TEXT NOT NULL,
+        sha256 TEXT NOT NULL,
+        status TEXT NOT NULL,
+        guidance TEXT NOT NULL,
+        PRIMARY KEY(attempt_id, direction)
+    );
+    """,
 )
 
 

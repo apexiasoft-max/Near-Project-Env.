@@ -21,6 +21,7 @@ def normalizer_script_path() -> Path:
 
 def create_window(container: Container) -> Any:
     from PySide6.QtWidgets import (
+        QComboBox,
         QDoubleSpinBox,
         QFileDialog,
         QFormLayout,
@@ -167,6 +168,35 @@ def create_window(container: Container) -> Any:
                 reference_actions.addWidget(button)
             layout.addLayout(reference_actions)
             self.reference_candidate_ids: list[str] = []
+            layout.addWidget(QLabel("Five-View Review"))
+            view_comparison = QHBoxLayout()
+            self.generated_view_previews: dict[str, QLabel] = {}
+            for direction in VIEW_NAMES:
+                preview = QLabel(direction.upper())
+                preview.setObjectName(f"generatedView{direction.title()}")
+                preview.setMinimumSize(130, 180)
+                preview.setScaledContents(True)
+                self.generated_view_previews[direction] = preview
+                view_comparison.addWidget(preview)
+            layout.addLayout(view_comparison)
+            self.revision_direction = QComboBox()
+            self.revision_direction.addItems(["entire set", *VIEW_NAMES])
+            layout.addWidget(self.revision_direction)
+            self.revision_guidance = QLineEdit()
+            self.revision_guidance.setPlaceholderText("Required revision guidance")
+            layout.addWidget(self.revision_guidance)
+            generated_actions = QHBoxLayout()
+            for label, action in (
+                ("Refresh Five Views", self.refresh_generated_views),
+                ("Request Revision", self.request_view_revision),
+                ("Approve Five-View Set", self.approve_generated_views),
+            ):
+                button = QPushButton(label)
+                button.setObjectName(action.__name__)
+                button.clicked.connect(action)
+                generated_actions.addWidget(button)
+            layout.addLayout(generated_actions)
+            self.active_view_attempt_id: str | None = None
             layout.addWidget(QLabel("System Health"))
             self.table = QTableWidget(5, 3)
             self.table.setObjectName("healthTable")
@@ -371,6 +401,55 @@ def create_window(container: Container) -> Any:
                 )
                 self.job_status.setText(f"Reference approved: {approval.id}")
                 self.refresh_audit()
+            except (KeyError, ValueError) as error:
+                self.job_status.setText(str(error))
+
+        def refresh_generated_views(self) -> None:
+            if self.active_building_id is None:
+                self.job_status.setText("Select or create a building first")
+                return
+            attempt = container.five_view_review.latest(self.active_building_id)
+            if attempt is None:
+                self.job_status.setText("No generated five-view attempt")
+                return
+            self.active_view_attempt_id = attempt.id
+            from PySide6.QtGui import QPixmap
+
+            for output in attempt.outputs:
+                preview = self.generated_view_previews[output.direction]
+                pixmap = QPixmap(str(output.image_path))
+                if pixmap.isNull():
+                    preview.setText(f"{output.direction.upper()} unavailable")
+                else:
+                    preview.setPixmap(pixmap)
+            self.job_status.setText(f"Five-view attempt v{attempt.version}: {attempt.status}")
+
+        def request_view_revision(self) -> None:
+            if self.active_view_attempt_id is None:
+                self.job_status.setText("Refresh and select a five-view attempt first")
+                return
+            direction = self.revision_direction.currentText()
+            directions = None if direction == "entire set" else {direction}
+            try:
+                revision = container.five_view_review.request_revision(
+                    self.active_view_attempt_id,
+                    self.revision_guidance.text(),
+                    directions,
+                )
+                self.active_view_attempt_id = revision.id
+                self.job_status.setText(f"Revision v{revision.version} queued")
+            except (KeyError, ValueError) as error:
+                self.job_status.setText(str(error))
+
+        def approve_generated_views(self) -> None:
+            if self.active_view_attempt_id is None:
+                self.job_status.setText("Refresh and select a five-view attempt first")
+                return
+            try:
+                approved = container.five_view_review.approve(self.active_view_attempt_id)
+                self.job_status.setText(
+                    f"Five-view attempt v{approved.version} approved; Hunyuan unlocked"
+                )
             except (KeyError, ValueError) as error:
                 self.job_status.setText(str(error))
 

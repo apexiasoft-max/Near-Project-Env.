@@ -7,6 +7,7 @@ from uuid import uuid4
 
 from npe.application.approvals import ApprovalService
 from npe.application.five_view_generation import FiveViewGenerationService
+from npe.application.five_view_review import FiveViewReviewService
 from npe.application.health import HealthService
 from npe.application.height import HeightService
 from npe.application.inventory import InventoryService
@@ -38,6 +39,7 @@ class Container:
     reference_review: ReferenceReviewService
     telegram: TelegramNotifier
     five_view_generation: FiveViewGenerationService
+    five_view_review: FiveViewReviewService
 
 
 def bootstrap(settings: Settings | None = None) -> Container:
@@ -64,4 +66,5 @@ def bootstrap(settings: Settings | None = None) -> Container:
             ChatGPTBrowserAdapter(active),
             lambda: f"RUN-{uuid4().hex[:12].upper()}",
         ),
+        FiveViewReviewService(database),
     )
