@@ -24,10 +24,12 @@ def create_window(container: Container) -> Any:
         QDoubleSpinBox,
         QFileDialog,
         QFormLayout,
+        QHBoxLayout,
         QLabel,
         QLineEdit,
         QMainWindow,
         QPushButton,
+        QScrollArea,
         QSpinBox,
         QTableWidget,
         QTableWidgetItem,
@@ -137,6 +139,34 @@ def create_window(container: Container) -> Any:
                 ["Time", "Actor", "Event", "Comment"]
             )
             layout.addWidget(self.audit_table)
+            layout.addWidget(QLabel("Reference Review"))
+            self.reference_preview = QLabel("Select a reference candidate")
+            self.reference_preview.setObjectName("referencePreview")
+            self.reference_preview.setMinimumHeight(180)
+            self.reference_preview.setScaledContents(False)
+            layout.addWidget(self.reference_preview)
+            self.reference_table = QTableWidget(0, 6)
+            self.reference_table.setObjectName("referenceCandidateTable")
+            self.reference_table.setHorizontalHeaderLabels(
+                ["Provider", "Source", "Attribution", "Quality", "Total", "Status"]
+            )
+            self.reference_table.cellClicked.connect(self.preview_reference)
+            layout.addWidget(self.reference_table)
+            reference_actions = QHBoxLayout()
+            for label, action in (
+                ("Refresh Candidates", self.refresh_references),
+                ("Select Candidate", self.select_reference),
+                ("Reject Candidate", self.reject_reference),
+                ("Upload Replacement", self.upload_reference),
+                ("Mark Missing", self.mark_reference_missing),
+                ("Approve Reference", self.approve_reference),
+            ):
+                button = QPushButton(label)
+                button.setObjectName(action.__name__)
+                button.clicked.connect(action)
+                reference_actions.addWidget(button)
+            layout.addLayout(reference_actions)
+            self.reference_candidate_ids: list[str] = []
             layout.addWidget(QLabel("System Health"))
             self.table = QTableWidget(5, 3)
             self.table.setObjectName("healthTable")
@@ -145,7 +175,10 @@ def create_window(container: Container) -> Any:
             refresh = QPushButton("Refresh Health")
             refresh.clicked.connect(self.refresh_health)
             layout.addWidget(refresh)
-            self.setCentralWidget(root)
+            scroll = QScrollArea()
+            scroll.setWidgetResizable(True)
+            scroll.setWidget(root)
+            self.setCentralWidget(scroll)
             self.refresh_health()
             self.refresh_dashboard()
 
@@ -212,6 +245,134 @@ def create_window(container: Container) -> Any:
                     (event.created_at, event.actor, event.event_type, event.comment)
                 ):
                     self.audit_table.setItem(row, column, QTableWidgetItem(value))
+
+        def refresh_references(self) -> None:
+            if self.active_project_id is None or self.active_building_id is None:
+                self.reference_table.setRowCount(0)
+                self.reference_candidate_ids = []
+                return
+            candidates = container.reference_review.list_candidates(
+                self.active_project_id, self.active_building_id
+            )
+            self.reference_candidate_ids = [item.id for item in candidates]
+            self.reference_table.setRowCount(len(candidates))
+            for row, item in enumerate(candidates):
+                status = (
+                    "Selected" if item.selected
+                    else "Rejected" if item.rejected
+                    else "Candidate"
+                )
+                values = (
+                    item.provider, item.source_id, f"{item.attribution_score:.3f}",
+                    f"{item.quality_score:.3f}", f"{item.total_score:.3f}", status,
+                )
+                for column, value in enumerate(values):
+                    self.reference_table.setItem(row, column, QTableWidgetItem(str(value)))
+            if candidates:
+                self.reference_table.selectRow(0)
+                self._show_reference(candidates[0].image_path)
+
+        def preview_reference(self, row: int, _column: int) -> None:
+            if not 0 <= row < len(self.reference_candidate_ids):
+                return
+            candidates = container.reference_review.list_candidates(
+                self.active_project_id or "", self.active_building_id or ""
+            )
+            selected = next(
+                (item for item in candidates if item.id == self.reference_candidate_ids[row]), None
+            )
+            if selected is not None:
+                self._show_reference(selected.image_path)
+
+        def _show_reference(self, path: Path) -> None:
+            from PySide6.QtCore import Qt
+            from PySide6.QtGui import QPixmap
+
+            pixmap = QPixmap(str(path))
+            if pixmap.isNull():
+                self.reference_preview.setText(f"Image unavailable: {path}")
+                return
+            self.reference_preview.setPixmap(
+                pixmap.scaled(
+                    760, 260, Qt.AspectRatioMode.KeepAspectRatio,
+                    Qt.TransformationMode.SmoothTransformation,
+                )
+            )
+
+        def _selected_reference_id(self) -> str | None:
+            row = self.reference_table.currentRow()
+            if not 0 <= row < len(self.reference_candidate_ids):
+                self.job_status.setText("Select a reference candidate first")
+                return None
+            return self.reference_candidate_ids[row]
+
+        def select_reference(self) -> None:
+            candidate_id = self._selected_reference_id()
+            if (
+                candidate_id is None
+                or self.active_project_id is None
+                or self.active_building_id is None
+            ):
+                return
+            container.reference_review.select(
+                self.active_project_id, self.active_building_id,
+                candidate_id, "local-operator",
+            )
+            self.job_status.setText(f"Selected reference {candidate_id}")
+            self.refresh_references()
+
+        def reject_reference(self) -> None:
+            candidate_id = self._selected_reference_id()
+            if (
+                candidate_id is None
+                or self.active_project_id is None
+                or self.active_building_id is None
+            ):
+                return
+            container.reference_review.reject(
+                self.active_project_id, self.active_building_id,
+                candidate_id, "local-operator",
+            )
+            self.job_status.setText(f"Rejected reference {candidate_id}")
+            self.refresh_references()
+
+        def upload_reference(self) -> None:
+            if self.active_project_id is None or self.active_building_id is None:
+                self.job_status.setText("Select or create a building first")
+                return
+            selected, _ = QFileDialog.getOpenFileName(
+                self, "Upload replacement reference", "", "Images (*.png *.jpg *.jpeg *.webp)"
+            )
+            if not selected:
+                return
+            candidate_id = container.reference_review.upload_replacement(
+                self.active_project_id, self.active_building_id,
+                Path(selected), "local-operator",
+            )
+            self.job_status.setText(f"Uploaded and selected {candidate_id}")
+            self.refresh_references()
+
+        def mark_reference_missing(self) -> None:
+            if self.active_project_id is None or self.active_building_id is None:
+                self.job_status.setText("Select or create a building first")
+                return
+            event_id = container.reference_review.mark_missing(
+                self.active_project_id, self.active_building_id, "local-operator"
+            )
+            self.job_status.setText(f"MissingReference notification queued: {event_id}")
+
+        def approve_reference(self) -> None:
+            if self.active_project_id is None or self.active_building_id is None:
+                self.job_status.setText("Select or create a building first")
+                return
+            try:
+                approval = container.reference_review.approve(
+                    self.active_project_id, self.active_building_id, "local-operator"
+                )
+                self.job_status.setText(f"Reference approved: {approval.id}")
+                self.refresh_audit()
+            except (KeyError, ValueError) as error:
+                self.job_status.setText(str(error))
 
         def project_command(self, command: str) -> None:
             if self.active_project_id is None:

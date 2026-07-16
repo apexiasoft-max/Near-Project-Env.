@@ -52,3 +52,18 @@ class ManualPoolItem:
     floors: int | None
     has_balcony: bool | None
     quality_score: float
+
+
+@dataclass(frozen=True)
+class ReferenceCandidate:
+    id: str
+    building_id: str
+    provider: ReferenceProvider
+    source_id: str
+    image_path: Path
+    attribution_score: float
+    quality_score: float
+    total_score: float
+    rank: int
+    selected: bool
+    rejected: bool

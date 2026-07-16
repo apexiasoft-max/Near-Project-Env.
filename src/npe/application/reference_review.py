@@ -12,6 +12,7 @@ from PIL import Image, UnidentifiedImageError
 
 from npe.application.approvals import ApprovalService
 from npe.domain.approval import ApprovalGate, ApprovalSnapshot
+from npe.domain.reference import ReferenceCandidate, ReferenceProvider
 from npe.infrastructure.database import Database
 
 
@@ -19,6 +20,26 @@ class ReferenceReviewService:
     def __init__(self, database: Database, approvals: ApprovalService) -> None:
         self.database = database
         self.approvals = approvals
+
+    def list_candidates(self, project_id: str, building_id: str) -> list[ReferenceCandidate]:
+        with self.database.connect() as connection:
+            rows = connection.execute(
+                """SELECT r.* FROM reference_candidates r
+                   JOIN buildings b ON b.id = r.building_id
+                   WHERE r.building_id = ? AND b.project_id = ? AND r.active = 1
+                   ORDER BY r.rank, r.created_at""",
+                (building_id, project_id),
+            ).fetchall()
+        return [
+            ReferenceCandidate(
+                str(row["id"]), str(row["building_id"]),
+                ReferenceProvider(str(row["provider"])), str(row["source_id"]),
+                Path(str(row["image_path"])), float(row["attribution_score"]),
+                float(row["quality_score"]), float(row["total_score"]),
+                int(row["rank"]), bool(row["selected"]), bool(row["rejected"]),
+            )
+            for row in rows
+        ]
 
     def select(
         self, project_id: str, building_id: str, candidate_id: str,
