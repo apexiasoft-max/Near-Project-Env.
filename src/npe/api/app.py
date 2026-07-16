@@ -61,6 +61,27 @@ def create_app(container: Container | None = None) -> Any:
         north: float
         candidates: list[InventoryCandidateRequest]
 
+    class UpdateBuildingRequest(BaseModel):
+        polygon: list[tuple[float, float]] = Field(min_length=3)
+        floors: int | None = Field(default=None, gt=0)
+        height_m: float = Field(gt=0)
+        front_bearing_deg: float | None = Field(default=None, ge=0, lt=360)
+
+    class ApproveInventoryRequest(BaseModel):
+        actor: str = Field(min_length=1)
+        comment: str = ""
+
+    class HeightEstimateRequest(BaseModel):
+        method: str
+        floors: int | None = Field(default=None, gt=0)
+        floor_height_m: float = 3.0
+        shadow_length_m: float | None = None
+        reference_shadow_m: float | None = None
+        reference_height_m: float | None = None
+        occluded: bool = False
+        height_m: float | None = None
+        reason: str = ""
+
     @app.get("/api/v1/health")
     def health() -> dict[str, object]:
         return active.health.inspect().to_dict()
@@ -228,6 +249,58 @@ def create_app(container: Container | None = None) -> Any:
                 }
                 for item in result.buildings
             ],
+        }
+
+    @app.patch("/api/v1/projects/{project_id}/buildings/{building_id}")
+    def update_building(
+        project_id: str, building_id: str, request: UpdateBuildingRequest
+    ) -> dict[str, object]:
+        item = active.inventory.update_building(
+            project_id, building_id, polygon=tuple(request.polygon),
+            floors=request.floors, height_m=request.height_m,
+            front_bearing_deg=request.front_bearing_deg,
+        )
+        return {"id": item.id, "code": item.code, "height_m": item.height_m}
+
+    @app.delete("/api/v1/projects/{project_id}/buildings/{building_id}", status_code=204)
+    def delete_building(project_id: str, building_id: str) -> None:
+        active.inventory.soft_delete(project_id, building_id)
+
+    @app.post("/api/v1/projects/{project_id}/inventory/approve")
+    def approve_inventory(
+        project_id: str, request: ApproveInventoryRequest
+    ) -> dict[str, object]:
+        approval = active.inventory.approve(project_id, request.actor, request.comment)
+        return {"approval_id": approval.id, "revision_id": approval.revision_id}
+
+    @app.post("/api/v1/projects/{project_id}/buildings/{building_id}/height")
+    def estimate_height(
+        project_id: str, building_id: str, request: HeightEstimateRequest
+    ) -> dict[str, object]:
+        if request.method == "floor_count" and request.floors is not None:
+            estimate = active.height.from_floors(request.floors, request.floor_height_m)
+        elif request.method == "calibrated_shadow" and all(
+            value is not None for value in (
+                request.shadow_length_m, request.reference_shadow_m,
+                request.reference_height_m,
+            )
+        ):
+            estimate = active.height.from_calibrated_shadow(
+                request.shadow_length_m or 0, request.reference_shadow_m or 0,
+                request.reference_height_m or 0, occluded=request.occluded,
+            )
+        elif request.method == "human_override" and request.height_m is not None:
+            estimate = active.height.override(request.height_m, request.floors, request.reason)
+        else:
+            from fastapi import HTTPException
+
+            raise HTTPException(status_code=422, detail="Evidence does not match height method")
+        active.height.apply(project_id, building_id, estimate)
+        return {
+            "height_m": estimate.height_m, "floors": estimate.floors,
+            "minimum_m": estimate.minimum_m, "maximum_m": estimate.maximum_m,
+            "method": estimate.method, "confidence": estimate.confidence,
+            "evidence": estimate.evidence,
         }
 
     return app

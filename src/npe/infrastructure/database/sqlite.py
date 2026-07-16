@@ -100,6 +100,13 @@ MIGRATIONS: tuple[str, ...] = (
     ALTER TABLE buildings ADD COLUMN inventory_source TEXT;
     ALTER TABLE buildings ADD COLUMN deleted_at TEXT;
     """,
+    """
+    ALTER TABLE buildings ADD COLUMN height_min_m REAL;
+    ALTER TABLE buildings ADD COLUMN height_max_m REAL;
+    ALTER TABLE buildings ADD COLUMN height_method TEXT;
+    ALTER TABLE buildings ADD COLUMN height_confidence REAL;
+    ALTER TABLE buildings ADD COLUMN height_evidence_json TEXT;
+    """,
 )
 
 

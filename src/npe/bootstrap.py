@@ -6,6 +6,7 @@ from dataclasses import dataclass
 
 from npe.application.approvals import ApprovalService
 from npe.application.health import HealthService
+from npe.application.height import HeightService
 from npe.application.inventory import InventoryService
 from npe.application.project_lifecycle import ProjectLifecycleService
 from npe.application.workflow import WalkingSkeletonService
@@ -24,6 +25,7 @@ class Container:
     lifecycle: ProjectLifecycleService
     approvals: ApprovalService
     inventory: InventoryService
+    height: HeightService
 
 
 def bootstrap(settings: Settings | None = None) -> Container:
@@ -36,6 +38,7 @@ def bootstrap(settings: Settings | None = None) -> Container:
     return Container(
         active, database, health, WalkingSkeletonService(active, database),
         HunyuanBrowserAdapter(active), ProjectLifecycleService(database, health),
-        ApprovalService(database),
-        InventoryService(active, database),
+        approvals := ApprovalService(database),
+        InventoryService(active, database, approvals),
+        HeightService(database),
     )

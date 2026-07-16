@@ -7,12 +7,15 @@ import json
 import math
 import re
 import shutil
+import sqlite3
 from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
 from PIL import Image, ImageDraw, ImageFont
 
+from npe.application.approvals import ApprovalService
+from npe.domain.approval import ApprovalGate, ApprovalSnapshot
 from npe.domain.inventory import (
     AerialCoverage,
     FootprintCandidate,
@@ -28,9 +31,85 @@ EARTH_RADIUS_M = 6_371_008.8
 
 
 class InventoryService:
-    def __init__(self, settings: Settings, database: Database) -> None:
+    def __init__(
+        self, settings: Settings, database: Database,
+        approvals: ApprovalService | None = None,
+    ) -> None:
         self.settings = settings
         self.database = database
+        self.approvals = approvals
+
+    def list_buildings(self, project_id: str) -> list[InventoryBuilding]:
+        with self.database.connect() as connection:
+            rows = connection.execute(
+                """SELECT * FROM buildings WHERE project_id = ? AND deleted_at IS NULL
+                   AND footprint_json IS NOT NULL ORDER BY code""",
+                (project_id,),
+            ).fetchall()
+        return [self._building(row) for row in rows]
+
+    def update_building(
+        self, project_id: str, building_id: str, *, polygon: Polygon,
+        floors: int | None, height_m: float, front_bearing_deg: float | None,
+    ) -> InventoryBuilding:
+        if len(polygon) < 3 or height_m <= 0 or (floors is not None and floors <= 0):
+            raise ValueError("Invalid building geometry or dimensions")
+        if front_bearing_deg is not None and not 0 <= front_bearing_deg < 360:
+            raise ValueError("Front bearing must be in [0, 360)")
+        center, radius_m = self._project_scope(project_id)
+        boundary = self._boundary_state(center, radius_m, polygon)
+        if boundary is None:
+            raise ValueError("Building footprint does not intersect project radius")
+        now = datetime.now(UTC).isoformat()
+        with self.database.connect() as connection:
+            cursor = connection.execute(
+                """UPDATE buildings SET footprint_json = ?, floors = ?, target_height_m = ?,
+                   front_bearing_deg = ?, boundary_intersection = ?, updated_at = ?
+                   WHERE id = ? AND project_id = ? AND deleted_at IS NULL""",
+                (
+                    json.dumps(polygon, separators=(",", ":")), floors, height_m,
+                    front_bearing_deg, int(boundary), now, building_id, project_id,
+                ),
+            )
+            if cursor.rowcount != 1:
+                raise KeyError(building_id)
+            row = connection.execute(
+                "SELECT * FROM buildings WHERE id = ?", (building_id,)
+            ).fetchone()
+        assert row is not None
+        return self._building(row)
+
+    def soft_delete(self, project_id: str, building_id: str) -> None:
+        with self.database.connect() as connection:
+            cursor = connection.execute(
+                """UPDATE buildings SET deleted_at = ?, status = 'deleted'
+                   WHERE id = ? AND project_id = ? AND deleted_at IS NULL""",
+                (datetime.now(UTC).isoformat(), building_id, project_id),
+            )
+        if cursor.rowcount != 1:
+            raise KeyError(building_id)
+
+    def approve(self, project_id: str, actor: str, comment: str = "") -> ApprovalSnapshot:
+        if self.approvals is None:
+            raise RuntimeError("Approval service is not configured")
+        buildings = self.list_buildings(project_id)
+        if not buildings:
+            raise ValueError("Inventory has no active buildings")
+        payload = {
+            "buildings": [
+                {
+                    "id": item.id, "code": item.code, "polygon": item.polygon,
+                    "boundary_intersection": item.boundary_intersection,
+                    "floors": item.floors, "height_m": item.height_m,
+                    "front_bearing_deg": item.front_bearing_deg,
+                }
+                for item in buildings
+            ]
+        }
+        revision = self.approvals.create_revision(
+            project_id, ApprovalGate.MAP, payload, actor, comment
+        )
+        return self.approvals.approve(revision.id, actor, comment)
 
     def build(
         self,
@@ -254,3 +333,17 @@ class InventoryService:
                         "footprint_json": json.dumps(building.polygon),
                     }
                 )
+
+    @staticmethod
+    def _building(row: sqlite3.Row) -> InventoryBuilding:
+        values = dict(row)
+        polygon = tuple(tuple(point) for point in json.loads(values["footprint_json"]))
+        return InventoryBuilding(
+            str(values["id"]), str(values["project_id"]), str(values["code"]),
+            polygon, bool(values["boundary_intersection"]),
+            int(values["floors"]) if values["floors"] is not None else None,
+            float(values["target_height_m"]),
+            float(values["front_bearing_deg"])
+            if values["front_bearing_deg"] is not None else None,
+            str(values["inventory_source"] or "manual"),
+        )

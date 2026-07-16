@@ -78,3 +78,29 @@ def test_rejects_aerial_that_does_not_cover_complete_radius(tmp_path: Path) -> N
     container = _container(tmp_path)
     with pytest.raises(ValueError, match="complete requested radius"):
         container.inventory.build(_project(container), _coverage(tmp_path, 0.0005), [])
+
+
+def test_reviewer_can_reshape_edit_delete_and_approve_version(tmp_path: Path) -> None:
+    container = _container(tmp_path)
+    project_id = _project(container)
+    built = container.inventory.build(
+        project_id, _coverage(tmp_path),
+        [FootprintCandidate(_square(51.4099, 35.7577), "manual", floors=5)],
+    )
+    item = built.buildings[0]
+    reshaped = _square(51.4100, 35.7577, 0.00008)
+    updated = container.inventory.update_building(
+        project_id, item.id, polygon=reshaped, floors=7,
+        height_m=22.5, front_bearing_deg=185,
+    )
+    assert updated.polygon == reshaped
+    assert (updated.floors, updated.height_m, updated.front_bearing_deg) == (7, 22.5, 185)
+
+    approval = container.inventory.approve(project_id, "reviewer", "inventory accepted")
+    assert approval.valid
+    revision = container.approvals.get_revision(approval.revision_id)
+    assert revision.version == 1
+    assert json.loads(revision.payload_json)["buildings"][0]["code"] == "B001"
+
+    container.inventory.soft_delete(project_id, item.id)
+    assert container.inventory.list_buildings(project_id) == []
