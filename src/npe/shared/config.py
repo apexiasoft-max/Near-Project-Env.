@@ -55,6 +55,8 @@ class Settings:
     worker_stale_after_seconds: int = 15
     minimum_free_disk_bytes: int = 2 * 1024**3
     blender_path: Path | None = None
+    telegram_bot_token: str | None = None
+    telegram_chat_id: str | None = None
 
     def validate(self) -> None:
         if self.api_host not in LOOPBACK_HOSTS:
@@ -80,6 +82,8 @@ def load_settings() -> Settings:
         api_host=os.environ.get("NPE_API_HOST", "127.0.0.1"),
         api_port=int(os.environ.get("NPE_API_PORT", "8765")),
         blender_path=Path(blender) if blender else None,
+        telegram_bot_token=os.environ.get("NPE_TELEGRAM_BOT_TOKEN"),
+        telegram_chat_id=os.environ.get("NPE_TELEGRAM_CHAT_ID"),
     )
     settings.validate()
     return settings

@@ -15,6 +15,7 @@ from npe.application.references import ReferenceService
 from npe.application.workflow import WalkingSkeletonService
 from npe.infrastructure.database import Database
 from npe.infrastructure.hunyuan_browser import HunyuanBrowserAdapter
+from npe.infrastructure.telegram import TelegramNotifier
 from npe.shared.config import Settings, load_settings
 
 
@@ -32,6 +33,7 @@ class Container:
     references: ReferenceService
     manual_pool: ManualPoolService
     reference_review: ReferenceReviewService
+    telegram: TelegramNotifier
 
 
 def bootstrap(settings: Settings | None = None) -> Container:
@@ -50,4 +52,7 @@ def bootstrap(settings: Settings | None = None) -> Container:
         ReferenceService(database),
         ManualPoolService(active, database),
         ReferenceReviewService(database, approvals),
+        TelegramNotifier(
+            database, active.telegram_bot_token, active.telegram_chat_id
+        ),
     )

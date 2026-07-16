@@ -31,6 +31,7 @@ def run_worker(once: bool = False, interval_seconds: float = 2.0) -> None:
     signal.signal(signal.SIGTERM, stop)
     while not should_stop:
         write_heartbeat(heartbeat)
+        container.telegram.dispatch_pending()
         if once:
             return
         time.sleep(interval_seconds)
@@ -45,4 +46,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

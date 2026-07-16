@@ -168,6 +168,9 @@ MIGRATIONS: tuple[str, ...] = (
         resolved_at TEXT
     );
     """,
+    """
+    ALTER TABLE intervention_events ADD COLUMN notified_at TEXT;
+    """,
 )
 
 

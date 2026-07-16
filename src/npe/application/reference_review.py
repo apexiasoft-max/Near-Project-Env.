@@ -145,7 +145,7 @@ class ReferenceReviewService:
             )
             connection.execute(
                 """UPDATE intervention_events SET status = 'resolved', resolved_at = ?
-                   WHERE building_id = ? AND status = 'pending'""",
+                   WHERE building_id = ? AND status IN ('pending', 'notified')""",
                 (now, building_id),
             )
         return approval
