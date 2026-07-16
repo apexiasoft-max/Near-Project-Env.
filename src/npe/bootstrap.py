@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from uuid import uuid4
 
 from npe.application.approvals import ApprovalService
+from npe.application.five_view_generation import FiveViewGenerationService
 from npe.application.health import HealthService
 from npe.application.height import HeightService
 from npe.application.inventory import InventoryService
@@ -13,6 +15,7 @@ from npe.application.project_lifecycle import ProjectLifecycleService
 from npe.application.reference_review import ReferenceReviewService
 from npe.application.references import ReferenceService
 from npe.application.workflow import WalkingSkeletonService
+from npe.infrastructure.chatgpt_browser import ChatGPTBrowserAdapter
 from npe.infrastructure.database import Database
 from npe.infrastructure.hunyuan_browser import HunyuanBrowserAdapter
 from npe.infrastructure.telegram import TelegramNotifier
@@ -34,6 +37,7 @@ class Container:
     manual_pool: ManualPoolService
     reference_review: ReferenceReviewService
     telegram: TelegramNotifier
+    five_view_generation: FiveViewGenerationService
 
 
 def bootstrap(settings: Settings | None = None) -> Container:
@@ -54,5 +58,10 @@ def bootstrap(settings: Settings | None = None) -> Container:
         ReferenceReviewService(database, approvals),
         TelegramNotifier(
             database, active.telegram_bot_token, active.telegram_chat_id
+        ),
+        FiveViewGenerationService(
+            active,
+            ChatGPTBrowserAdapter(active),
+            lambda: f"RUN-{uuid4().hex[:12].upper()}",
         ),
     )

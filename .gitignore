@@ -36,3 +36,6 @@ dist-*/
 
 # Reproducible Sprint gate evidence keeps exported artifacts, not local databases.
 artifacts/**/runtime/app.db*
+
+# Live provider outputs stay local; sanitized manifests/reports may be committed.
+artifacts/sprint4/**/original-sheet.png
