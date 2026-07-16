@@ -103,6 +103,8 @@ class WalkingSkeletonService:
         ensure_transition(job.stage, JobStage.NORMALIZING)
         if not source.is_file():
             raise FileNotFoundError(source)
+        if source.suffix.lower() not in {".fbx", ".glb", ".gltf"}:
+            raise ValueError("Downloaded model must be FBX, GLB, or GLTF")
         target = self._building_root(job) / "models" / "raw" / source.name
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, target)

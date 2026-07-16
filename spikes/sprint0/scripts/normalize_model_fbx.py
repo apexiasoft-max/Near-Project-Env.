@@ -58,10 +58,16 @@ def main() -> None:
     bpy.context.scene.unit_settings.system = "METRIC"
     bpy.context.scene.unit_settings.scale_length = 1.0
 
-    bpy.ops.import_scene.gltf(filepath=str(args.input))
+    input_suffix = args.input.suffix.lower()
+    if input_suffix == ".fbx":
+        bpy.ops.import_scene.fbx(filepath=str(args.input))
+    elif input_suffix in {".glb", ".gltf"}:
+        bpy.ops.import_scene.gltf(filepath=str(args.input))
+    else:
+        raise ValueError(f"Unsupported model format: {input_suffix}")
     imported = mesh_objects()
     if not imported:
-        raise RuntimeError("GLB contains no mesh objects")
+        raise RuntimeError(f"{input_suffix} input contains no mesh objects")
 
     before = dimensions(imported)
     if before.z <= 0:
@@ -101,10 +107,10 @@ def main() -> None:
         "input": str(args.input),
         "output": str(args.output),
         "target_height_m": args.target_height_m,
-        "source_dimensions": dict(zip(("x", "y", "z"), before)),
+        "source_dimensions": dict(zip(("x", "y", "z"), before, strict=True)),
         "scale_factor": scale_factor,
-        "normalized_dimensions_m": dict(zip(("x", "y", "z"), after)),
-        "reimported_dimensions_m": dict(zip(("x", "y", "z"), verified)),
+        "normalized_dimensions_m": dict(zip(("x", "y", "z"), after, strict=True)),
+        "reimported_dimensions_m": dict(zip(("x", "y", "z"), verified, strict=True)),
         "mesh_objects": len(reimported),
         "vertices": sum(len(obj.data.vertices) for obj in reimported),
         "polygons": sum(len(obj.data.polygons) for obj in reimported),

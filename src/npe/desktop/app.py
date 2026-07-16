@@ -154,7 +154,7 @@ def create_window(container: Container) -> Any:
                 self.job_status.setText("Create a job first")
                 return
             selected, _ = QFileDialog.getOpenFileName(
-                self, "Select downloaded model", "", "3D models (*.glb *.gltf)"
+                self, "Select downloaded model", "", "3D models (*.fbx *.glb *.gltf)"
             )
             if not selected:
                 return

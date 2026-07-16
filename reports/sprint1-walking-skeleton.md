@@ -47,3 +47,10 @@ while any job awaits that action.
   facades and (b) a true 30-45 degree Left view, changing only one variable per attempt.
 - The UI now separates `Open Hunyuan` from `Confirm Hunyuan Submission`, preventing a premature
   `Awaiting Manual Download` transition.
+- Product correction: direct Hunyuan FBX is now the preferred download. GLB/GLTF remain supported
+  fallbacks; Blender imports either path, normalizes metre scale, exports FBX and verifies re-import.
+- The manually downloaded artifact was registered to `RUN-8B1C4812DC` and normalized by Blender 5.0.
+  The 24 m target re-imported at 24.0000019 m (0.0000019 m absolute error), with one mesh,
+  919,078 vertices and 1,418,930 polygons. Verification passed.
+- Final workstation artifact:
+  `C:/ProgramData/NearProjectEnvironment/projects/PRJ-AF5534DC/buildings/BLD-214CDF32/models/final/RUN-8B1C4812DC.fbx`

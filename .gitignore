@@ -28,4 +28,6 @@ __pycache__/
 .ruff_cache/
 build/
 dist/
+build-next/
+dist-next/
 *.egg-info/
