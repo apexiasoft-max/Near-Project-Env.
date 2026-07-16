@@ -66,3 +66,7 @@ while any job awaits that action.
 - Live adapter run `RUN-ADAPTER-LIVE-001` reached Hunyuan but was redirected to Login because the
   dedicated application profile has no authenticated session. Login is the remaining external gate;
   credentials and cookies are not copied from the user's regular Chrome profile.
+- After one-time Login, `RUN-ADAPTER-LIVE-002` connected over the dedicated Chrome CDP boundary,
+  uploaded all five views, observed two detection failures, accepted three views and automatically
+  started generation. Hunyuan completed geometry and texture generation; the output selector was
+  changed to FBX and Download became available.

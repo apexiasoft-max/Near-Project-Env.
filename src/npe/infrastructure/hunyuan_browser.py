@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Final
 
-from playwright.sync_api import BrowserContext, Page, sync_playwright
+from playwright.sync_api import Browser, BrowserContext, Error, Page, sync_playwright
 
 from npe.shared.config import Settings
 
@@ -33,18 +34,31 @@ class HunyuanBrowserAdapter:
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
         self._playwright: Any | None = None
+        self._browser: Browser | None = None
         self._context: BrowserContext | None = None
 
     def open(self) -> Page:
         if self._context is None:
             self._playwright = sync_playwright().start()
-            self._context = self._playwright.chromium.launch_persistent_context(
-                str(self.settings.paths.browser_profile),
-                channel="chrome",
-                headless=False,
-                no_viewport=True,
-                args=["--no-first-run", "--no-default-browser-check"],
-            )
+            try:
+                self._browser = self._playwright.chromium.connect_over_cdp(
+                    "http://127.0.0.1:9223"
+                )
+                if not self._browser.contexts:
+                    raise RuntimeError("Dedicated Chrome has no browser context")
+                self._context = self._browser.contexts[0]
+            except Error:
+                self._context = self._playwright.chromium.launch_persistent_context(
+                    str(self.settings.paths.browser_profile),
+                    channel="chrome",
+                    headless=False,
+                    no_viewport=True,
+                    args=[
+                        "--remote-debugging-port=9223",
+                        "--no-first-run",
+                        "--no-default-browser-check",
+                    ],
+                )
         page = self._hunyuan_page()
         page.bring_to_front()
         return page
@@ -86,10 +100,12 @@ class HunyuanBrowserAdapter:
     def _open_multi_view_dialog(page: Page) -> None:
         page.get_by_text("Image-to-3D", exact=True).click()
         page.get_by_text("Multiple Images", exact=True).click()
-        heading = page.get_by_role("heading", name="Add Multiple Views")
-        if heading.count() == 0:
-            page.locator("button").filter(has=page.locator("svg")).first.click()
-        heading.wait_for(state="visible")
+        inputs = page.locator('input[type="file"]')
+        if inputs.count() != 8:
+            page.get_by_role(
+                "button", name=re.compile(r"Add Multiple Views", re.IGNORECASE)
+            ).click()
+        inputs.first.wait_for(state="attached")
 
     @staticmethod
     def _raise_session_failure(page: Page) -> None:
