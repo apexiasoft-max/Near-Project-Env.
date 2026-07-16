@@ -1,0 +1,29 @@
+{
+  "coordinates": {
+    "latitude": 35.7577,
+    "longitude": 51.4099
+  },
+  "radius_m": 200,
+  "building_count": 4,
+  "boundary_codes": [
+    "B004"
+  ],
+  "corrected_building": "B001",
+  "height_estimate": {
+    "meters": 21.0,
+    "floors": 7,
+    "range": [
+      18.0,
+      24.0
+    ],
+    "method": "floor_count",
+    "confidence": 0.72
+  },
+  "approval_id": "APR-A4F0F75C97",
+  "revision_id": "REV-01F8007678",
+  "artifacts": {
+    "coded_aerial": "C:\\Users\\Ariya Rayan\\Documents\\Near Project Environment\\artifacts\\sprint2\\gate\\runtime\\projects\\PRJ-9C739E3D\\inventory\\aerial_coded.png",
+    "geojson": "C:\\Users\\Ariya Rayan\\Documents\\Near Project Environment\\artifacts\\sprint2\\gate\\runtime\\projects\\PRJ-9C739E3D\\inventory\\buildings.geojson",
+    "csv": "C:\\Users\\Ariya Rayan\\Documents\\Near Project Environment\\artifacts\\sprint2\\gate\\runtime\\projects\\PRJ-9C739E3D\\inventory\\buildings.csv"
+  }
+}

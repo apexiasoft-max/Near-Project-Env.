@@ -1,0 +1,168 @@
+{
+  "type": "FeatureCollection",
+  "properties": {
+    "center": [
+      51.4099,
+      35.7577
+    ],
+    "radius_m": 200
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "id": "BLD-C6ECBAAC",
+      "properties": {
+        "code": "B001",
+        "boundary_intersection": false,
+        "floors": 6,
+        "height_m": 18.0,
+        "front_bearing_deg": null,
+        "source": "reviewed-aerial"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              51.40918,
+              35.75768
+            ],
+            [
+              51.409420000000004,
+              35.75768
+            ],
+            [
+              51.409420000000004,
+              35.757920000000006
+            ],
+            [
+              51.40918,
+              35.757920000000006
+            ],
+            [
+              51.40918,
+              35.75768
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-8AC4FB27",
+      "properties": {
+        "code": "B002",
+        "boundary_intersection": false,
+        "floors": 8,
+        "height_m": 24.0,
+        "front_bearing_deg": null,
+        "source": "reviewed-aerial"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              51.40985,
+              35.75725
+            ],
+            [
+              51.410149999999994,
+              35.75725
+            ],
+            [
+              51.410149999999994,
+              35.757549999999995
+            ],
+            [
+              51.40985,
+              35.757549999999995
+            ],
+            [
+              51.40985,
+              35.75725
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-D42CD33D",
+      "properties": {
+        "code": "B003",
+        "boundary_intersection": false,
+        "floors": 5,
+        "height_m": 15.0,
+        "front_bearing_deg": null,
+        "source": "reviewed-aerial"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              51.41069,
+              35.75809
+            ],
+            [
+              51.41091,
+              35.75809
+            ],
+            [
+              51.41091,
+              35.75831
+            ],
+            [
+              51.41069,
+              35.75831
+            ],
+            [
+              51.41069,
+              35.75809
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-696E12F9",
+      "properties": {
+        "code": "B004",
+        "boundary_intersection": true,
+        "floors": 7,
+        "height_m": 21.0,
+        "front_bearing_deg": null,
+        "source": "reviewed-aerial"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              51.4119,
+              35.75755
+            ],
+            [
+              51.4122,
+              35.75755
+            ],
+            [
+              51.4122,
+              35.75785
+            ],
+            [
+              51.4119,
+              35.75785
+            ],
+            [
+              51.4119,
+              35.75755
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

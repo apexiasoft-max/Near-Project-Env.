@@ -33,3 +33,6 @@ dist-next/
 build-*/
 dist-*/
 *.egg-info/
+
+# Reproducible Sprint gate evidence keeps exported artifacts, not local databases.
+artifacts/**/runtime/app.db*
