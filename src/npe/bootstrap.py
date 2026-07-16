@@ -16,6 +16,7 @@ from npe.application.project_lifecycle import ProjectLifecycleService
 from npe.application.recovery import WorkflowRecoveryService
 from npe.application.reference_review import ReferenceReviewService
 from npe.application.references import ReferenceService
+from npe.application.reliability import ProviderLockService, RetryExecutor
 from npe.application.workflow import WalkingSkeletonService
 from npe.infrastructure.chatgpt_browser import ChatGPTBrowserAdapter
 from npe.infrastructure.database import Database
@@ -42,6 +43,8 @@ class Container:
     five_view_generation: FiveViewGenerationService
     five_view_review: FiveViewReviewService
     recovery: WorkflowRecoveryService
+    retry: RetryExecutor
+    provider_locks: ProviderLockService
 
 
 def bootstrap(settings: Settings | None = None) -> Container:
@@ -69,5 +72,7 @@ def bootstrap(settings: Settings | None = None) -> Container:
             lambda: f"RUN-{uuid4().hex[:12].upper()}",
         ),
         FiveViewReviewService(database),
-        WorkflowRecoveryService(database),
+        recovery := WorkflowRecoveryService(database),
+        RetryExecutor(database, recovery),
+        ProviderLockService(database),
     )

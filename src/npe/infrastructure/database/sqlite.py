@@ -213,6 +213,14 @@ MIGRATIONS: tuple[str, ...] = (
     );
     CREATE INDEX idx_stage_attempts_running ON stage_attempts(status, started_at);
     """,
+    """
+    CREATE TABLE provider_locks (
+        provider TEXT PRIMARY KEY,
+        owner_id TEXT NOT NULL,
+        acquired_at REAL NOT NULL,
+        expires_at REAL NOT NULL
+    );
+    """,
 )
 
 
