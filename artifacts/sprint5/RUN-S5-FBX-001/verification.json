@@ -1,0 +1,26 @@
+{
+  "input": "manual-download/17eb98a9d2c97a60f5a20c516a154abd.fbx",
+  "output": "artifacts\\sprint5\\RUN-S5-FBX-001\\scaled-31.5m.fbx",
+  "target_height_m": 31.5,
+  "source_dimensions": {
+    "x": 0.7630320191383362,
+    "y": 0.67746901512146,
+    "z": 0.652226984500885
+  },
+  "scale_factor": 48.29606984768545,
+  "normalized_dimensions_m": {
+    "x": 36.85144805908203,
+    "y": 32.719093322753906,
+    "z": 31.500003814697266
+  },
+  "reimported_dimensions_m": {
+    "x": 36.85144805908203,
+    "y": 32.719093322753906,
+    "z": 31.500001907348633
+  },
+  "mesh_objects": 1,
+  "vertices": 739361,
+  "polygons": 1479326,
+  "tolerance_m": 0.0315,
+  "verification_passed": true
+}
