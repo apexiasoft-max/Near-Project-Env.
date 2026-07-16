@@ -54,6 +54,44 @@ MIGRATIONS: tuple[str, ...] = (
     UPDATE projects SET output_path = '' WHERE output_path IS NULL;
     UPDATE projects SET status = 'draft' WHERE status = 'active';
     """,
+    """
+    CREATE TABLE revisions (
+        id TEXT PRIMARY KEY,
+        project_id TEXT NOT NULL REFERENCES projects(id),
+        building_id TEXT REFERENCES buildings(id),
+        gate TEXT NOT NULL,
+        version INTEGER NOT NULL,
+        payload_json TEXT NOT NULL,
+        content_hash TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        UNIQUE(project_id, building_id, gate, version)
+    );
+    CREATE TABLE approval_snapshots (
+        id TEXT PRIMARY KEY,
+        revision_id TEXT NOT NULL REFERENCES revisions(id),
+        project_id TEXT NOT NULL REFERENCES projects(id),
+        building_id TEXT REFERENCES buildings(id),
+        gate TEXT NOT NULL,
+        actor TEXT NOT NULL,
+        comment TEXT NOT NULL,
+        approved_at TEXT NOT NULL
+    );
+    CREATE TABLE approval_invalidations (
+        approval_id TEXT PRIMARY KEY REFERENCES approval_snapshots(id),
+        caused_by_revision_id TEXT NOT NULL REFERENCES revisions(id),
+        invalidated_at TEXT NOT NULL
+    );
+    CREATE TABLE audit_events (
+        id TEXT PRIMARY KEY,
+        project_id TEXT NOT NULL REFERENCES projects(id),
+        building_id TEXT REFERENCES buildings(id),
+        event_type TEXT NOT NULL,
+        actor TEXT NOT NULL,
+        comment TEXT NOT NULL,
+        changes_json TEXT NOT NULL,
+        created_at TEXT NOT NULL
+    );
+    """,
 )
 
 

@@ -1,7 +1,5 @@
 """FastAPI entrypoint."""
 
-from __future__ import annotations
-
 import json
 import time
 from collections.abc import Iterator
@@ -11,6 +9,7 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from npe.bootstrap import Container, bootstrap
+from npe.domain.approval import ApprovalGate
 
 
 def create_app(container: Container | None = None) -> Any:
@@ -27,6 +26,24 @@ def create_app(container: Container | None = None) -> Any:
         building_code: str = Field(min_length=1)
         target_height_m: float = Field(gt=0)
         output_path: Path | None = None
+
+    class CreateRevisionRequest(BaseModel):
+        gate: ApprovalGate
+        payload: dict[str, object]
+        actor: str = Field(min_length=1)
+        comment: str = ""
+        building_id: str | None = None
+
+    class ApproveRequest(BaseModel):
+        actor: str = Field(min_length=1)
+        comment: str = ""
+
+    class BatchApproveRequest(BaseModel):
+        gate: ApprovalGate
+        building_ids: list[str]
+        excluded_building_ids: list[str] = Field(default_factory=list)
+        actor: str = Field(min_length=1)
+        comment: str = ""
 
     @app.get("/api/v1/health")
     def health() -> dict[str, object]:
@@ -68,7 +85,7 @@ def create_app(container: Container | None = None) -> Any:
             for project in active.lifecycle.list_projects()
         ]
 
-    @app.post("/api/v1/projects/{project_id}/{command}")
+    @app.post("/api/v1/projects/{project_id}/commands/{command}")
     def project_command(project_id: str, command: str) -> dict[str, object]:
         from fastapi import HTTPException
 
@@ -111,6 +128,53 @@ def create_app(container: Container | None = None) -> Any:
                 time.sleep(1)
 
         return StreamingResponse(stream(), media_type="text/event-stream")
+
+    @app.post("/api/v1/projects/{project_id}/revisions")
+    def create_revision(
+        project_id: str, request: CreateRevisionRequest
+    ) -> dict[str, object]:
+        revision = active.approvals.create_revision(
+            project_id, request.gate, request.payload, request.actor,
+            request.comment, request.building_id,
+        )
+        return {
+            "id": revision.id, "gate": revision.gate, "version": revision.version,
+            "content_hash": revision.content_hash,
+        }
+
+    @app.post("/api/v1/revisions/{revision_id}/approve")
+    def approve_revision(
+        revision_id: str, request: ApproveRequest
+    ) -> dict[str, object]:
+        approval = active.approvals.approve(
+            revision_id, request.actor, request.comment
+        )
+        return {"id": approval.id, "revision_id": approval.revision_id}
+
+    @app.post("/api/v1/projects/{project_id}/approvals/batch")
+    def batch_approve(
+        project_id: str, request: BatchApproveRequest
+    ) -> list[dict[str, object]]:
+        approvals = active.approvals.batch_approve(
+            project_id, request.gate, request.building_ids,
+            request.excluded_building_ids, request.actor, request.comment,
+        )
+        return [{"id": item.id, "building_id": item.building_id} for item in approvals]
+
+    @app.get("/api/v1/projects/{project_id}/audit")
+    def audit_timeline(project_id: str) -> list[dict[str, object]]:
+        return [
+            {
+                "id": event.id,
+                "building_id": event.building_id,
+                "event_type": event.event_type,
+                "actor": event.actor,
+                "comment": event.comment,
+                "changes_json": event.changes_json,
+                "created_at": event.created_at,
+            }
+            for event in active.approvals.audit_timeline(project_id)
+        ]
 
     return app
 

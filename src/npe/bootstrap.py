@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from npe.application.approvals import ApprovalService
 from npe.application.health import HealthService
 from npe.application.project_lifecycle import ProjectLifecycleService
 from npe.application.workflow import WalkingSkeletonService
@@ -20,6 +21,7 @@ class Container:
     workflow: WalkingSkeletonService
     hunyuan: HunyuanBrowserAdapter
     lifecycle: ProjectLifecycleService
+    approvals: ApprovalService
 
 
 def bootstrap(settings: Settings | None = None) -> Container:
@@ -32,4 +34,5 @@ def bootstrap(settings: Settings | None = None) -> Container:
     return Container(
         active, database, health, WalkingSkeletonService(active, database),
         HunyuanBrowserAdapter(active), ProjectLifecycleService(database, health),
+        ApprovalService(database),
     )

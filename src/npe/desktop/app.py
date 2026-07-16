@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 from typing import Any
 
 from npe.application.workflow import VIEW_NAMES, BlenderNormalizer
 from npe.bootstrap import Container, bootstrap
+from npe.domain.approval import ApprovalGate
 
 
 def normalizer_script_path() -> Path:
@@ -75,6 +77,7 @@ def create_window(container: Container) -> Any:
             layout.addWidget(self.job_status)
             self.active_run_id: str | None = None
             self.active_project_id: str | None = None
+            self.active_building_id: str | None = None
             self.view_paths: dict[str, Path] = {}
             for view_name in VIEW_NAMES:
                 button = QPushButton(f"Select {view_name.title()} image")
@@ -116,6 +119,24 @@ def create_window(container: Container) -> Any:
                 ["Project", "Status", "Buildings", "Jobs", "Completed", "Output"]
             )
             layout.addWidget(self.project_table)
+            self.approval_comment = QLineEdit()
+            self.approval_comment.setPlaceholderText("Approval comment")
+            layout.addWidget(self.approval_comment)
+            for label, gate in (
+                ("Approve Map Snapshot", ApprovalGate.MAP),
+                ("Approve Reference Snapshot", ApprovalGate.REFERENCE),
+                ("Approve Five-View Snapshot", ApprovalGate.VIEW),
+            ):
+                button = QPushButton(label)
+                button.clicked.connect(
+                    lambda _checked=False, value=gate: self.approve_current(value)
+                )
+                layout.addWidget(button)
+            self.audit_table = QTableWidget(0, 4)
+            self.audit_table.setHorizontalHeaderLabels(
+                ["Time", "Actor", "Event", "Comment"]
+            )
+            layout.addWidget(self.audit_table)
             layout.addWidget(QLabel("System Health"))
             self.table = QTableWidget(5, 3)
             self.table.setObjectName("healthTable")
@@ -137,7 +158,60 @@ def create_window(container: Container) -> Any:
             self.job_status.setText(f"{job.run_id}: {job.stage}")
             self.active_run_id = job.run_id
             self.active_project_id = job.project_id
+            self.active_building_id = job.building_id
             self.refresh_dashboard()
+
+        def approve_current(self, gate: ApprovalGate) -> None:
+            if self.active_project_id is None:
+                self.job_status.setText("Select or create a project first")
+                return
+            building_id = None if gate == ApprovalGate.MAP else self.active_building_id
+            if gate != ApprovalGate.MAP and building_id is None:
+                self.job_status.setText("Select or create a building first")
+                return
+            payload: dict[str, object]
+            if gate == ApprovalGate.MAP:
+                payload = {
+                    "latitude": self.latitude.value(),
+                    "longitude": self.longitude.value(),
+                    "radius_m": self.radius.value(),
+                    "output_path": self.output_path.text(),
+                }
+            elif gate == ApprovalGate.REFERENCE:
+                payload = {name: str(path) for name, path in self.view_paths.items()}
+            else:
+                if self.active_run_id is None:
+                    self.job_status.setText("No active Run")
+                    return
+                job = container.workflow.get_job(self.active_run_id)
+                if job.input_manifest is None:
+                    self.job_status.setText("Approve five views before snapshotting them")
+                    return
+                payload = json.loads(job.input_manifest.read_text(encoding="utf-8"))
+            try:
+                revision = container.approvals.create_revision(
+                    self.active_project_id, gate, payload, "local-operator",
+                    self.approval_comment.text(), building_id,
+                )
+                approval = container.approvals.approve(
+                    revision.id, "local-operator", self.approval_comment.text()
+                )
+                self.job_status.setText(f"Approved {gate}: {approval.id}")
+                self.refresh_audit()
+            except (KeyError, ValueError) as error:
+                self.job_status.setText(str(error))
+
+        def refresh_audit(self) -> None:
+            if self.active_project_id is None:
+                self.audit_table.setRowCount(0)
+                return
+            events = container.approvals.audit_timeline(self.active_project_id)
+            self.audit_table.setRowCount(len(events))
+            for row, event in enumerate(events):
+                for column, value in enumerate(
+                    (event.created_at, event.actor, event.event_type, event.comment)
+                ):
+                    self.audit_table.setItem(row, column, QTableWidgetItem(value))
 
         def project_command(self, command: str) -> None:
             if self.active_project_id is None:
@@ -167,6 +241,7 @@ def create_window(container: Container) -> Any:
                     self.project_table.setItem(row, column, QTableWidgetItem(str(value)))
             if self.active_project_id is None and projects:
                 self.active_project_id = projects[0].id
+            self.refresh_audit()
 
         def select_view(self, name: str) -> None:
             selected, _ = QFileDialog.getOpenFileName(
