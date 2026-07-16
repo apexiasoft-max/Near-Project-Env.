@@ -70,3 +70,8 @@ while any job awaits that action.
   uploaded all five views, observed two detection failures, accepted three views and automatically
   started generation. Hunyuan completed geometry and texture generation; the output selector was
   changed to FBX and Download became available.
+- The direct Hunyuan FBX was downloaded, imported by Blender 5.0, normalized to 24 m, exported and
+  re-imported at 24.0000019 m. Verification passed with one mesh, 739,361 vertices and 1,479,326
+  polygons.
+- Final direct-FBX artifact:
+  `C:/ProgramData/NearProjectEnvironment/projects/PRJ-AF5534DC/buildings/BLD-214CDF32/models/final/RUN-ADAPTER-LIVE-002.fbx`
