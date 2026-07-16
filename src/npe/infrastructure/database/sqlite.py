@@ -49,6 +49,11 @@ MIGRATIONS: tuple[str, ...] = (
         updated_at TEXT NOT NULL
     );
     """,
+    """
+    ALTER TABLE projects ADD COLUMN output_path TEXT;
+    UPDATE projects SET output_path = '' WHERE output_path IS NULL;
+    UPDATE projects SET status = 'draft' WHERE status = 'active';
+    """,
 )
 
 

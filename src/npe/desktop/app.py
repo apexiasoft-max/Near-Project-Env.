@@ -55,6 +55,7 @@ def create_window(container: Container) -> Any:
             self.height_input = QDoubleSpinBox()
             self.height_input.setRange(1, 1000)
             self.height_input.setValue(15)
+            self.output_path = QLineEdit(str(container.settings.paths.projects))
             fields = (
                 ("Project", self.project_name),
                 ("Latitude", self.latitude),
@@ -62,6 +63,7 @@ def create_window(container: Container) -> Any:
                 ("Radius (m)", self.radius),
                 ("Building", self.building_code),
                 ("Height (m)", self.height_input),
+                ("Output path", self.output_path),
             )
             for label, widget in fields:
                 form.addRow(label, widget)
@@ -72,6 +74,7 @@ def create_window(container: Container) -> Any:
             self.job_status = QLabel("No job created")
             layout.addWidget(self.job_status)
             self.active_run_id: str | None = None
+            self.active_project_id: str | None = None
             self.view_paths: dict[str, Path] = {}
             for view_name in VIEW_NAMES:
                 button = QPushButton(f"Select {view_name.title()} image")
@@ -94,8 +97,28 @@ def create_window(container: Container) -> Any:
             download = QPushButton("Register Downloaded Model + Build FBX")
             download.clicked.connect(self.register_model)
             layout.addWidget(download)
+            lifecycle_buttons = (
+                ("Start Project", "start"),
+                ("Pause Project", "pause"),
+                ("Resume Project", "resume"),
+                ("Cancel Project", "cancel"),
+            )
+            for label, command in lifecycle_buttons:
+                button = QPushButton(label)
+                button.clicked.connect(
+                    lambda _checked=False, value=command: self.project_command(value)
+                )
+                layout.addWidget(button)
+            layout.addWidget(QLabel("Project Dashboard"))
+            self.project_table = QTableWidget(0, 6)
+            self.project_table.setObjectName("projectDashboard")
+            self.project_table.setHorizontalHeaderLabels(
+                ["Project", "Status", "Buildings", "Jobs", "Completed", "Output"]
+            )
+            layout.addWidget(self.project_table)
             layout.addWidget(QLabel("System Health"))
             self.table = QTableWidget(5, 3)
+            self.table.setObjectName("healthTable")
             self.table.setHorizontalHeaderLabels(["Component", "Status", "Detail"])
             layout.addWidget(self.table)
             refresh = QPushButton("Refresh Health")
@@ -103,14 +126,47 @@ def create_window(container: Container) -> Any:
             layout.addWidget(refresh)
             self.setCentralWidget(root)
             self.refresh_health()
+            self.refresh_dashboard()
 
         def create_job(self) -> None:
             job = container.workflow.create_job(
                 self.project_name.text(), self.latitude.value(), self.longitude.value(),
                 self.radius.value(), self.building_code.text(), self.height_input.value(),
+                Path(self.output_path.text()),
             )
             self.job_status.setText(f"{job.run_id}: {job.stage}")
             self.active_run_id = job.run_id
+            self.active_project_id = job.project_id
+            self.refresh_dashboard()
+
+        def project_command(self, command: str) -> None:
+            if self.active_project_id is None:
+                self.job_status.setText("Select or create a project first")
+                return
+            action = getattr(container.lifecycle, command)
+            try:
+                project = action(self.active_project_id)
+                self.job_status.setText(f"{project.id}: {project.status}")
+                self.refresh_dashboard()
+            except (RuntimeError, ValueError, KeyError) as error:
+                self.job_status.setText(str(error))
+
+        def refresh_dashboard(self) -> None:
+            projects = container.lifecycle.list_projects()
+            self.project_table.setRowCount(len(projects))
+            for row, project in enumerate(projects):
+                values = (
+                    project.name,
+                    project.status,
+                    project.building_count,
+                    project.total_jobs,
+                    project.completed_jobs,
+                    project.output_path,
+                )
+                for column, value in enumerate(values):
+                    self.project_table.setItem(row, column, QTableWidgetItem(str(value)))
+            if self.active_project_id is None and projects:
+                self.active_project_id = projects[0].id
 
         def select_view(self, name: str) -> None:
             selected, _ = QFileDialog.getOpenFileName(

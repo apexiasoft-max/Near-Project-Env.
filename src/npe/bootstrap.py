@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from npe.application.health import HealthService
+from npe.application.project_lifecycle import ProjectLifecycleService
 from npe.application.workflow import WalkingSkeletonService
 from npe.infrastructure.database import Database
 from npe.infrastructure.hunyuan_browser import HunyuanBrowserAdapter
@@ -18,6 +19,7 @@ class Container:
     health: HealthService
     workflow: WalkingSkeletonService
     hunyuan: HunyuanBrowserAdapter
+    lifecycle: ProjectLifecycleService
 
 
 def bootstrap(settings: Settings | None = None) -> Container:
@@ -26,7 +28,8 @@ def bootstrap(settings: Settings | None = None) -> Container:
     active.paths.initialize()
     database = Database(active.paths.database)
     database.migrate()
+    health = HealthService(active, database)
     return Container(
-        active, database, HealthService(active, database),
-        WalkingSkeletonService(active, database), HunyuanBrowserAdapter(active),
+        active, database, health, WalkingSkeletonService(active, database),
+        HunyuanBrowserAdapter(active), ProjectLifecycleService(database, health),
     )

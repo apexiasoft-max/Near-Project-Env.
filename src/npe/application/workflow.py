@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Protocol
 from uuid import uuid4
 
+from npe.domain.project import ProjectStatus, validate_project_input
 from npe.domain.workflow import Job, JobStage, ensure_transition
 from npe.infrastructure.database import Database
 from npe.shared.config import Settings
@@ -48,16 +49,33 @@ class WalkingSkeletonService:
     def create_job(
         self, name: str, latitude: float, longitude: float, radius_m: int,
         building_code: str, target_height_m: float,
+        output_path: Path | None = None,
     ) -> Job:
         now = datetime.now(UTC).isoformat()
         project_id = f"PRJ-{uuid4().hex[:8].upper()}"
         building_id = f"BLD-{uuid4().hex[:8].upper()}"
         job_id = f"JOB-{uuid4().hex[:8].upper()}"
         run_id = f"RUN-{uuid4().hex[:10].upper()}"
+        resolved_output = (
+            output_path.expanduser().resolve()
+            if output_path is not None
+            else (self.settings.paths.projects / project_id).resolve()
+        )
+        validate_project_input(name, latitude, longitude, radius_m, resolved_output)
+        if not building_code.strip():
+            raise ValueError("Building code is required")
+        if target_height_m <= 0:
+            raise ValueError("Target height must be positive")
         with self.database.connect() as connection:
             connection.execute(
-                "INSERT INTO projects VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                (project_id, name, latitude, longitude, radius_m, "active", now, now),
+                """INSERT INTO projects
+                   (id, name, latitude, longitude, radius_m, status, created_at, updated_at,
+                    output_path)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (
+                    project_id, name.strip(), latitude, longitude, radius_m,
+                    ProjectStatus.DRAFT, now, now, str(resolved_output),
+                ),
             )
             connection.execute(
                 "INSERT INTO buildings VALUES (?, ?, ?, ?, ?, ?, ?)",

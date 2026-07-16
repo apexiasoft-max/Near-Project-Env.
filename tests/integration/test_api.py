@@ -20,3 +20,20 @@ def test_health_endpoint_uses_versioned_loopback_contract(tmp_path: Path) -> Non
     assert set(payload) == {"status", "database", "disk", "worker", "browser", "blender"}
     assert payload["database"]["status"] == "ok"
 
+
+def test_project_dashboard_and_progress_event_contract(tmp_path: Path) -> None:
+    settings = Settings(paths=AppPaths.under(tmp_path), minimum_free_disk_bytes=0)
+    container = bootstrap(settings)
+    job = container.workflow.create_job("P", 35.7, 51.4, 100, "B1", 12)
+    client = TestClient(create_app(container))
+
+    projects = client.get("/api/v1/projects")
+    assert projects.status_code == 200
+    assert projects.json()[0]["id"] == job.project_id
+    assert projects.json()[0]["status"] == "draft"
+
+    events = client.get("/api/v1/events?once=true")
+    assert events.status_code == 200
+    assert events.headers["content-type"].startswith("text/event-stream")
+    assert "event: projects" in events.text
+    assert job.project_id in events.text
