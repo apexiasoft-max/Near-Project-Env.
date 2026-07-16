@@ -8,7 +8,9 @@ from npe.application.approvals import ApprovalService
 from npe.application.health import HealthService
 from npe.application.height import HeightService
 from npe.application.inventory import InventoryService
+from npe.application.manual_pool import ManualPoolService
 from npe.application.project_lifecycle import ProjectLifecycleService
+from npe.application.references import ReferenceService
 from npe.application.workflow import WalkingSkeletonService
 from npe.infrastructure.database import Database
 from npe.infrastructure.hunyuan_browser import HunyuanBrowserAdapter
@@ -26,6 +28,8 @@ class Container:
     approvals: ApprovalService
     inventory: InventoryService
     height: HeightService
+    references: ReferenceService
+    manual_pool: ManualPoolService
 
 
 def bootstrap(settings: Settings | None = None) -> Container:
@@ -41,4 +45,6 @@ def bootstrap(settings: Settings | None = None) -> Container:
         approvals := ApprovalService(database),
         InventoryService(active, database, approvals),
         HeightService(database),
+        ReferenceService(database),
+        ManualPoolService(active, database),
     )

@@ -107,6 +107,52 @@ MIGRATIONS: tuple[str, ...] = (
     ALTER TABLE buildings ADD COLUMN height_confidence REAL;
     ALTER TABLE buildings ADD COLUMN height_evidence_json TEXT;
     """,
+    """
+    CREATE TABLE reference_candidates (
+        id TEXT PRIMARY KEY,
+        building_id TEXT NOT NULL REFERENCES buildings(id),
+        provider TEXT NOT NULL,
+        source_id TEXT NOT NULL,
+        image_path TEXT NOT NULL,
+        captured_at TEXT,
+        camera_lon REAL,
+        camera_lat REAL,
+        heading_deg REAL,
+        fov_deg REAL,
+        width_px INTEGER NOT NULL,
+        height_px INTEGER NOT NULL,
+        visibility REAL NOT NULL,
+        occlusion REAL NOT NULL,
+        attribution_score REAL NOT NULL,
+        quality_score REAL NOT NULL,
+        total_score REAL NOT NULL,
+        rank INTEGER NOT NULL,
+        evidence_json TEXT NOT NULL,
+        metadata_json TEXT NOT NULL,
+        active INTEGER NOT NULL DEFAULT 1,
+        created_at TEXT NOT NULL
+    );
+    CREATE INDEX idx_reference_candidates_building
+        ON reference_candidates(building_id, active, rank);
+    """,
+    """
+    CREATE TABLE manual_pool_items (
+        id TEXT PRIMARY KEY,
+        project_id TEXT NOT NULL REFERENCES projects(id),
+        original_path TEXT NOT NULL,
+        sha256 TEXT NOT NULL,
+        width_px INTEGER NOT NULL,
+        height_px INTEGER NOT NULL,
+        style TEXT,
+        floors INTEGER,
+        has_balcony INTEGER,
+        quality_score REAL NOT NULL,
+        metadata_json TEXT NOT NULL,
+        indexed_at TEXT NOT NULL,
+        active INTEGER NOT NULL DEFAULT 1,
+        UNIQUE(project_id, sha256)
+    );
+    """,
 )
 
 
