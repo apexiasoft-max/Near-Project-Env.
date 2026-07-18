@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "method": "square-pad-v1",
+  "appearance_changed": false,
+  "outputs": {
+    "front": {
+      "source": "artifacts\\sprint5\\RUN-S5-LIVE-002\\views\\front.png",
+      "output": "artifacts\\sprint5\\RUN-S5-LIVE-002\\prepared-square\\front.png",
+      "size": [
+        653,
+        653
+      ],
+      "offset": [
+        126,
+        0
+      ]
+    },
+    "back": {
+      "source": "artifacts\\sprint5\\RUN-S5-LIVE-002\\views\\back.png",
+      "output": "artifacts\\sprint5\\RUN-S5-LIVE-002\\prepared-square\\back.png",
+      "size": [
+        653,
+        653
+      ],
+      "offset": [
+        127,
+        0
+      ]
+    },
+    "left": {
+      "source": "artifacts\\sprint5\\RUN-S5-LIVE-002\\views\\left.png",
+      "output": "artifacts\\sprint5\\RUN-S5-LIVE-002\\prepared-square\\left.png",
+      "size": [
+        653,
+        653
+      ],
+      "offset": [
+        127,
+        0
+      ]
+    },
+    "right": {
+      "source": "artifacts\\sprint5\\RUN-S5-LIVE-002\\views\\right.png",
+      "output": "artifacts\\sprint5\\RUN-S5-LIVE-002\\prepared-square\\right.png",
+      "size": [
+        653,
+        653
+      ],
+      "offset": [
+        126,
+        0
+      ]
+    },
+    "top": {
+      "source": "artifacts\\sprint5\\RUN-S5-LIVE-002\\views\\top.png",
+      "output": "artifacts\\sprint5\\RUN-S5-LIVE-002\\prepared-square\\top.png",
+      "size": [
+        746,
+        746
+      ],
+      "offset": [
+        0,
+        219
+      ]
+    }
+  }
+}

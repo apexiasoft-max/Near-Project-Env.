@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "run_id": "RUN-S5-LIVE-002",
+  "provider": "hunyuan-global-web",
+  "status": "completed",
+  "control_surface": "windows-computer-use",
+  "chrome_extension_required": false,
+  "input_preparation": {
+    "method": "square-pad-v1",
+    "appearance_changed": false,
+    "background": "dark-charcoal-gray"
+  },
+  "accepted_directions": ["top", "front", "left", "right", "back"],
+  "generation": {
+    "model": "3DGeneration-V3.1",
+    "generation_type": "Geometry+Texture",
+    "faces_reported_by_provider": 1497444,
+    "vertices_reported_by_provider": 936536
+  },
+  "download": {
+    "format": "FBX",
+    "mode": "manual-by-product-owner-decision",
+    "registered_path": "raw/hunyuan.fbx"
+  },
+  "normalization": {
+    "target_height_m": 31.5,
+    "verification_report": "verification.json",
+    "verification_passed": true
+  },
+  "sensitive_data_included": false
+}

@@ -1,0 +1,26 @@
+{
+  "input": "artifacts\\sprint5\\RUN-S5-LIVE-002\\raw\\hunyuan.fbx",
+  "output": "artifacts\\sprint5\\RUN-S5-LIVE-002\\final\\scaled-31.5m.fbx",
+  "target_height_m": 31.5,
+  "source_dimensions": {
+    "x": 0.4534519910812378,
+    "y": 0.36910808086395264,
+    "z": 1.0810290575027466
+  },
+  "scale_factor": 29.1389022167149,
+  "normalized_dimensions_m": {
+    "x": 13.213093757629395,
+    "y": 10.75540542602539,
+    "z": 31.5
+  },
+  "reimported_dimensions_m": {
+    "x": 13.213093757629395,
+    "y": 10.75540542602539,
+    "z": 31.5
+  },
+  "mesh_objects": 1,
+  "vertices": 748036,
+  "polygons": 1496880,
+  "tolerance_m": 0.0315,
+  "verification_passed": true
+}
