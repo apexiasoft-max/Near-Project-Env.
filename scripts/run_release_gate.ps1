@@ -1,7 +1,7 @@
 $ErrorActionPreference = "Stop"
 $Python = Join-Path $PSScriptRoot "..\.venv\Scripts\python.exe"
 
-& $Python -m ruff check src tests
+& $Python -m ruff check src tests scripts
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 & $Python -m mypy src/npe
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

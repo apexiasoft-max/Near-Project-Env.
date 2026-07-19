@@ -1,0 +1,22 @@
+{
+  "active_human_minutes": 0,
+  "building_count": 12,
+  "checks": {
+    "coded_folders": true,
+    "failure_isolation": true,
+    "html_report": true,
+    "package_manifest": true,
+    "representative_building_count": true,
+    "status_distribution": true
+  },
+  "completed": 9,
+  "completion_rate": 0.75,
+  "delivery_path": "runtime\\projects\\PRJ-GATE-S6\\delivery",
+  "delivery_size_bytes": 69115,
+  "error_count": 1,
+  "gate": "APE-94",
+  "missing": 2,
+  "needs_review": 1,
+  "passed": true,
+  "runtime_seconds": 0.11181020003277808
+}
