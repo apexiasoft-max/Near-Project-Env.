@@ -74,6 +74,22 @@ def test_codes_are_never_reused_after_soft_delete(tmp_path: Path) -> None:
     assert second.buildings[0].code == "B002"
 
 
+def test_rejected_unapproved_inventory_can_be_discarded_and_recoded(tmp_path: Path) -> None:
+    container = _container(tmp_path)
+    project_id = _project(container)
+    first = container.inventory.build(
+        project_id, _coverage(tmp_path),
+        [FootprintCandidate(_square(51.4099, 35.7577), "first")],
+    )
+    assert first.buildings[0].code == "B001"
+    assert container.inventory.discard_unapproved(project_id) == 1
+    second = container.inventory.build(
+        project_id, _coverage(tmp_path),
+        [FootprintCandidate(_square(51.4101, 35.7577), "corrected")],
+    )
+    assert second.buildings[0].code == "B001"
+
+
 def test_rejects_aerial_that_does_not_cover_complete_radius(tmp_path: Path) -> None:
     container = _container(tmp_path)
     with pytest.raises(ValueError, match="complete requested radius"):

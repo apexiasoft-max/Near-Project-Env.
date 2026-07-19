@@ -89,6 +89,21 @@ class InventoryService:
         if cursor.rowcount != 1:
             raise KeyError(building_id)
 
+    def discard_unapproved(self, project_id: str) -> int:
+        """Remove a rejected candidate set so corrected codes can restart at B001."""
+        with self.database.connect() as connection:
+            approved = connection.execute(
+                "SELECT 1 FROM approval_snapshots WHERE project_id = ? AND gate = 'map' LIMIT 1",
+                (project_id,),
+            ).fetchone()
+            if approved is not None:
+                raise ValueError("Approved inventory cannot be discarded")
+            cursor = connection.execute(
+                "DELETE FROM buildings WHERE project_id = ? AND status IN ('candidate', 'deleted')",
+                (project_id,),
+            )
+        return cursor.rowcount
+
     def approve(self, project_id: str, actor: str, comment: str = "") -> ApprovalSnapshot:
         if self.approvals is None:
             raise RuntimeError("Approval service is not configured")
@@ -126,6 +141,7 @@ class InventoryService:
             boundary = self._boundary_state(center, radius_m, candidate.polygon)
             if boundary is not None:
                 included.append((candidate, boundary))
+        included.sort(key=lambda item: self._candidate_sort_key(center, item[0]))
         codes = self._allocate_codes(project_id, len(included))
         now = datetime.now(UTC).isoformat()
         buildings: list[InventoryBuilding] = []
@@ -159,7 +175,7 @@ class InventoryService:
         coded = root / "aerial_coded.png"
         geojson = root / "buildings.geojson"
         csv_path = root / "buildings.csv"
-        self._render(coverage, buildings, coded)
+        self._render(coverage, center, radius_m, buildings, coded)
         self._write_geojson(center, radius_m, buildings, geojson)
         self._write_csv(buildings, csv_path)
         return InventoryArtifacts(original, coded, geojson, csv_path, tuple(buildings))
@@ -185,6 +201,15 @@ class InventoryService:
         ]
         start = max(used, default=0) + 1
         return [f"B{number:03d}" for number in range(start, start + count)]
+
+    @staticmethod
+    def _candidate_sort_key(
+        center: LonLat, candidate: FootprintCandidate
+    ) -> tuple[float, float]:
+        lon = sum(point[0] for point in candidate.polygon) / len(candidate.polygon)
+        lat = sum(point[1] for point in candidate.polygon) / len(candidate.polygon)
+        x, y = InventoryService._local_meters(center, (lon, lat))
+        return math.hypot(x, y), math.atan2(x, y)
 
     @staticmethod
     def _validate_coverage(
@@ -257,11 +282,28 @@ class InventoryService:
 
     @staticmethod
     def _render(
-        coverage: AerialCoverage, buildings: list[InventoryBuilding], target: Path
+        coverage: AerialCoverage, center: LonLat, radius_m: int,
+        buildings: list[InventoryBuilding], target: Path,
     ) -> None:
         with Image.open(coverage.image_path).convert("RGB") as image:
             draw = ImageDraw.Draw(image)
             font = ImageFont.load_default()
+            center_x = (center[0] - coverage.west) / (coverage.east - coverage.west) * image.width
+            center_y = (coverage.north - center[1]) / (
+                coverage.north - coverage.south
+            ) * image.height
+            radius_x = radius_m / (
+                InventoryService._local_meters(center, (coverage.east, center[1]))[0]
+            ) * (image.width - center_x)
+            radius_y = radius_m / (
+                InventoryService._local_meters(center, (center[0], coverage.north))[1]
+            ) * center_y
+            draw.ellipse(
+                (center_x - radius_x, center_y - radius_y,
+                 center_x + radius_x, center_y + radius_y),
+                outline=(0, 220, 255), width=4,
+            )
+            occupied: list[tuple[float, float, float, float]] = []
             for building in buildings:
                 pixels = [
                     (
@@ -274,8 +316,21 @@ class InventoryService:
                 draw.line(pixels + [pixels[0]], fill=color, width=3)
                 cx = sum(point[0] for point in pixels) / len(pixels)
                 cy = sum(point[1] for point in pixels) / len(pixels)
-                draw.rectangle((cx - 3, cy - 7, cx + 33, cy + 7), fill=(255, 255, 255))
-                draw.text((cx, cy - 6), building.code, fill=(0, 0, 0), font=font)
+                box = None
+                for dx, dy in ((0, 0), (10, -16), (10, 16), (-38, -16), (-38, 16)):
+                    candidate_box = (cx + dx - 3, cy + dy - 7, cx + dx + 31, cy + dy + 7)
+                    if not any(
+                        candidate_box[0] < item[2] and candidate_box[2] > item[0]
+                        and candidate_box[1] < item[3] and candidate_box[3] > item[1]
+                        for item in occupied
+                    ):
+                        box = candidate_box
+                        break
+                if box is None:
+                    box = (cx - 3, cy - 7, cx + 31, cy + 7)
+                occupied.append(box)
+                draw.rectangle(box, fill=(255, 255, 255), outline=color)
+                draw.text((box[0] + 3, box[1] + 1), building.code, fill=(0, 0, 0), font=font)
             image.save(target, format="PNG")
 
     @staticmethod
