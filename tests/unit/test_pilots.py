@@ -57,5 +57,21 @@ def test_pilot_evidence_is_immutable_and_validated(tmp_path: Path) -> None:
     service.record(run)
     with pytest.raises(FileExistsError):
         service.record(run)
+
+
+def test_pilot_session_tracks_human_events(tmp_path: Path) -> None:
+    service = _service(tmp_path)
+    target = service.start_session(
+        "PILOT-MEZO-01", "Mezo", "PRJ-1", latitude=35.78,
+        longitude=51.37, radius_m=200,
+    )
+    assert service.start_session(
+        "PILOT-MEZO-01", "Mezo", "PRJ-1", latitude=35.78,
+        longitude=51.37, radius_m=200,
+    ) == target
+    service.record_human_event("PILOT-MEZO-01", "approval", 2.5)
+    payload = json.loads(target.read_text(encoding="utf-8"))
+    assert payload["project_id"] == "PRJ-1"
+    assert payload["active_human_events"][0]["minutes"] == 2.5
     with pytest.raises(ValueError, match="real project"):
         service.record(PilotRun("PILOT-DEMO-001", "demo", "pilot", False, "pc", 2, 10, 2, True))

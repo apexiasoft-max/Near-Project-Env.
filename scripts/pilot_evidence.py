@@ -11,6 +11,17 @@ from npe.shared.config import load_settings
 def main() -> int:
     parser = argparse.ArgumentParser()
     sub = parser.add_subparsers(dest="command", required=True)
+    start = sub.add_parser("start")
+    start.add_argument("run_id")
+    start.add_argument("project_name")
+    start.add_argument("project_id")
+    start.add_argument("latitude", type=float)
+    start.add_argument("longitude", type=float)
+    start.add_argument("radius_m", type=int)
+    event = sub.add_parser("human-event")
+    event.add_argument("run_id")
+    event.add_argument("activity")
+    event.add_argument("minutes", type=float)
     typical = sub.add_parser("import-typical")
     typical.add_argument("gate", type=Path)
     record = sub.add_parser("record")
@@ -18,6 +29,15 @@ def main() -> int:
     sub.add_parser("evaluate")
     args = parser.parse_args()
     service = PilotEvidenceService(load_settings())
+    if args.command == "start":
+        print(service.start_session(
+            args.run_id, args.project_name, args.project_id,
+            latitude=args.latitude, longitude=args.longitude, radius_m=args.radius_m,
+        ))
+        return 0
+    if args.command == "human-event":
+        print(service.record_human_event(args.run_id, args.activity, args.minutes))
+        return 0
     if args.command == "import-typical":
         print(service.import_typical_gate(args.gate))
         return 0

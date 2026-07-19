@@ -61,6 +61,45 @@ class PilotEvidenceService:
         self._write_json(target, payload)
         return target
 
+    def start_session(
+        self, run_id: str, project_name: str, project_id: str, *,
+        latitude: float, longitude: float, radius_m: int,
+    ) -> Path:
+        if RUN_ID.fullmatch(run_id) is None:
+            raise ValueError("Invalid pilot run ID")
+        if not project_name.strip() or not project_id.strip() or radius_m <= 0:
+            raise ValueError("Pilot session metadata is invalid")
+        self.root.mkdir(parents=True, exist_ok=True)
+        target = self.root / f"{run_id}.session.json"
+        if target.exists():
+            return target
+        self._write_json(target, {
+            "run_id": run_id,
+            "project_name": project_name,
+            "project_id": project_id,
+            "latitude": latitude,
+            "longitude": longitude,
+            "radius_m": radius_m,
+            "started_at": datetime.now(UTC).isoformat(),
+            "active_human_events": [],
+        })
+        return target
+
+    def record_human_event(self, run_id: str, activity: str, minutes: float) -> Path:
+        if not activity.strip() or minutes <= 0:
+            raise ValueError("Human activity and positive minutes are required")
+        target = self.root / f"{run_id}.session.json"
+        if not target.exists():
+            raise FileNotFoundError(f"Pilot session is not started: {run_id}")
+        payload = json.loads(target.read_text(encoding="utf-8"))
+        payload["active_human_events"].append({
+            "activity": activity,
+            "minutes": minutes,
+            "recorded_at": datetime.now(UTC).isoformat(),
+        })
+        self._write_json(target, payload)
+        return target
+
     def import_typical_gate(self, gate_result: Path) -> Path:
         payload = json.loads(gate_result.read_text(encoding="utf-8"))
         if payload.get("passed") is not True:
