@@ -28,6 +28,13 @@ def create_app(container: Container | None = None) -> Any:
         target_height_m: float = Field(gt=0)
         output_path: Path | None = None
 
+    class CreateProjectRequest(BaseModel):
+        name: str = Field(min_length=1)
+        latitude: float = Field(ge=-90, le=90)
+        longitude: float = Field(ge=-180, le=180)
+        radius_m: int = Field(gt=0, le=200)
+        output_path: Path | None = None
+
     class CreateRevisionRequest(BaseModel):
         gate: ApprovalGate
         payload: dict[str, object]
@@ -121,6 +128,16 @@ def create_app(container: Container | None = None) -> Any:
             }
             for project in active.lifecycle.list_projects()
         ]
+
+    @app.post("/api/v1/projects")
+    def create_project(request: CreateProjectRequest) -> dict[str, object]:
+        project = active.lifecycle.create(**request.model_dump())
+        return {
+            "id": project.id,
+            "status": project.status,
+            "building_count": project.building_count,
+            "output_path": str(project.output_path),
+        }
 
     @app.post("/api/v1/projects/{project_id}/commands/{command}")
     def project_command(project_id: str, command: str) -> dict[str, object]:

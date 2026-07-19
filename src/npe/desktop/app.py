@@ -56,25 +56,19 @@ def create_window(container: Container) -> Any:
             self.radius = QSpinBox()
             self.radius.setRange(1, 200)
             self.radius.setValue(200)
-            self.building_code = QLineEdit("B001")
-            self.height_input = QDoubleSpinBox()
-            self.height_input.setRange(1, 1000)
-            self.height_input.setValue(15)
             self.output_path = QLineEdit(str(container.settings.paths.projects))
             fields = (
                 ("Project", self.project_name),
                 ("Latitude", self.latitude),
                 ("Longitude", self.longitude),
                 ("Radius (m)", self.radius),
-                ("Building", self.building_code),
-                ("Height (m)", self.height_input),
                 ("Output path", self.output_path),
             )
             for label, widget in fields:
                 form.addRow(label, widget)
             layout.addLayout(form)
-            create = QPushButton("Create Project + Building Job")
-            create.clicked.connect(self.create_job)
+            create = QPushButton("Create Project")
+            create.clicked.connect(self.create_project)
             layout.addWidget(create)
             self.job_status = QLabel("No job created")
             layout.addWidget(self.job_status)
@@ -212,16 +206,15 @@ def create_window(container: Container) -> Any:
             self.refresh_health()
             self.refresh_dashboard()
 
-        def create_job(self) -> None:
-            job = container.workflow.create_job(
+        def create_project(self) -> None:
+            project = container.lifecycle.create(
                 self.project_name.text(), self.latitude.value(), self.longitude.value(),
-                self.radius.value(), self.building_code.text(), self.height_input.value(),
-                Path(self.output_path.text()),
+                self.radius.value(), Path(self.output_path.text()),
             )
-            self.job_status.setText(f"{job.run_id}: {job.stage}")
-            self.active_run_id = job.run_id
-            self.active_project_id = job.project_id
-            self.active_building_id = job.building_id
+            self.job_status.setText(f"{project.id}: {project.status}")
+            self.active_run_id = None
+            self.active_project_id = project.id
+            self.active_building_id = None
             self.refresh_dashboard()
 
         def approve_current(self, gate: ApprovalGate) -> None:

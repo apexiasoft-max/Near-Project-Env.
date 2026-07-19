@@ -63,3 +63,16 @@ def test_project_input_validation_happens_before_persistence(tmp_path: Path) -> 
     with pytest.raises(ValueError, match="Radius"):
         container.workflow.create_job("P", 35.7, 51.4, 201, "B1", 12)
     assert container.lifecycle.list_projects() == []
+
+
+def test_project_can_be_created_without_modeling_the_unbuilt_main_building(
+    tmp_path: Path,
+) -> None:
+    container = bootstrap(ready_settings(tmp_path))
+    project = container.lifecycle.create("Mezo", 35.7849298, 51.3730481, 200)
+    assert project.building_count == 0
+    assert project.total_jobs == 0
+    with container.database.connect() as connection:
+        assert connection.execute(
+            "SELECT COUNT(*) FROM buildings WHERE project_id = ?", (project.id,)
+        ).fetchone()[0] == 0

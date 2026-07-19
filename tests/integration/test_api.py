@@ -39,6 +39,19 @@ def test_project_dashboard_and_progress_event_contract(tmp_path: Path) -> None:
     assert job.project_id in events.text
 
 
+def test_create_project_does_not_create_a_fake_main_building(tmp_path: Path) -> None:
+    container = bootstrap(Settings(paths=AppPaths.under(tmp_path), minimum_free_disk_bytes=0))
+    response = TestClient(create_app(container)).post(
+        "/api/v1/projects",
+        json={
+            "name": "Mezo", "latitude": 35.7849298, "longitude": 51.3730481,
+            "radius_m": 200,
+        },
+    )
+    assert response.status_code == 200
+    assert response.json()["building_count"] == 0
+
+
 def test_versioned_approval_api_exposes_audit_timeline(tmp_path: Path) -> None:
     settings = Settings(paths=AppPaths.under(tmp_path), minimum_free_disk_bytes=0)
     container = bootstrap(settings)

@@ -6,12 +6,14 @@ import sqlite3
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
+from uuid import uuid4
 
 from npe.application.health import HealthService
 from npe.domain.project import (
     ProjectStatus,
     ProjectSummary,
     ensure_project_transition,
+    validate_project_input,
 )
 from npe.infrastructure.database import Database
 
@@ -52,6 +54,34 @@ class ProjectLifecycleService:
             for name, value in required.items()
         )
         return PreflightResult(all(item.passed for item in checks), checks)
+
+    def create(
+        self,
+        name: str,
+        latitude: float,
+        longitude: float,
+        radius_m: int,
+        output_path: Path | None = None,
+    ) -> ProjectSummary:
+        project_id = f"PRJ-{uuid4().hex[:8].upper()}"
+        resolved_output = (
+            output_path.expanduser().resolve()
+            if output_path is not None
+            else (self.health.settings.paths.projects / project_id).resolve()
+        )
+        validate_project_input(name, latitude, longitude, radius_m, resolved_output)
+        now = datetime.now(UTC).isoformat()
+        with self.database.connect() as connection:
+            connection.execute(
+                """INSERT INTO projects
+                   (id, name, latitude, longitude, radius_m, status, created_at, updated_at,
+                    output_path) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (
+                    project_id, name.strip(), latitude, longitude, radius_m,
+                    ProjectStatus.DRAFT, now, now, str(resolved_output),
+                ),
+            )
+        return self.get_project(project_id)
 
     def start(self, project_id: str) -> ProjectSummary:
         result = self.preflight()
