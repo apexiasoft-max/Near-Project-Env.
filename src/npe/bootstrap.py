@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from uuid import uuid4
 
 from npe.application.approvals import ApprovalService
+from npe.application.delivery import DeliveryPackageService
 from npe.application.five_view_generation import FiveViewGenerationService
 from npe.application.five_view_review import FiveViewReviewService
 from npe.application.health import HealthService
@@ -46,6 +47,7 @@ class Container:
     recovery: WorkflowRecoveryService
     retry: RetryExecutor
     provider_locks: ProviderLockService
+    delivery: DeliveryPackageService
 
 
 def bootstrap(settings: Settings | None = None) -> Container:
@@ -80,4 +82,5 @@ def bootstrap(settings: Settings | None = None) -> Container:
         recovery := WorkflowRecoveryService(database),
         RetryExecutor(database, recovery),
         ProviderLockService(database),
+        DeliveryPackageService(active, database),
     )
