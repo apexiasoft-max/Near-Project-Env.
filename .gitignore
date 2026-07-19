@@ -32,6 +32,10 @@ build-next/
 dist-next/
 build-*/
 dist-*/
+release/
+release-smoke-data/
+release-install-source/
+release-installed/
 *.egg-info/
 
 # Reproducible Sprint gate evidence keeps exported artifacts, not local databases.

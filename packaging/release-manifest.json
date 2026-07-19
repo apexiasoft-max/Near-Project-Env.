@@ -1,0 +1,9 @@
+{
+  "product": "Near Project Environment",
+  "version": "0.1.0-mvp",
+  "target_os": "Windows 10/11 x64",
+  "python": "3.12",
+  "browser": "Chrome with persistent signed-in profile",
+  "manual_fallback": "Hunyuan FBX download",
+  "dependency_lock": "requirements.lock"
+}

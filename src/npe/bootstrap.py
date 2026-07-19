@@ -13,6 +13,7 @@ from npe.application.health import HealthService
 from npe.application.height import HeightService
 from npe.application.inventory import InventoryService
 from npe.application.manual_pool import ManualPoolService
+from npe.application.operations import DiagnosticsService, PrerequisiteService, UpgradeService
 from npe.application.project_lifecycle import ProjectLifecycleService
 from npe.application.recovery import WorkflowRecoveryService
 from npe.application.reference_review import ReferenceReviewService
@@ -48,6 +49,9 @@ class Container:
     retry: RetryExecutor
     provider_locks: ProviderLockService
     delivery: DeliveryPackageService
+    prerequisites: PrerequisiteService
+    upgrade: UpgradeService
+    diagnostics: DiagnosticsService
 
 
 def bootstrap(settings: Settings | None = None) -> Container:
@@ -83,4 +87,7 @@ def bootstrap(settings: Settings | None = None) -> Container:
         RetryExecutor(database, recovery),
         ProviderLockService(database),
         DeliveryPackageService(active, database),
+        PrerequisiteService(),
+        UpgradeService(active, database),
+        DiagnosticsService(active, database, health),
     )

@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import argparse
+import json
 import subprocess
 import sys
 from collections.abc import Sequence
+from dataclasses import asdict
 
 
 def component_command(component: str) -> list[str]:
@@ -50,10 +52,26 @@ def launch_all() -> int:
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--component", choices=("all", "api", "worker", "desktop"), default="all"
+        "--component",
+        choices=("all", "api", "worker", "desktop", "prerequisites", "upgrade", "diagnostics"),
+        default="all",
     )
     parser.add_argument("--once", action="store_true")
     args = parser.parse_args(argv)
+    if args.component in {"prerequisites", "upgrade", "diagnostics"}:
+        from npe.bootstrap import bootstrap
+
+        container = bootstrap()
+        if args.component == "prerequisites":
+            report = container.prerequisites.inspect()
+            result = asdict(report)
+        elif args.component == "upgrade":
+            receipt = container.upgrade.upgrade()
+            result = {**asdict(receipt), "backup_path": str(receipt.backup_path)}
+        else:
+            result = {"bundle": str(container.diagnostics.create_bundle())}
+        print(json.dumps(result, indent=2))
+        return 0 if args.component != "prerequisites" or report.passed else 1
     if args.component == "all":
         return launch_all()
     if args.component == "api":
