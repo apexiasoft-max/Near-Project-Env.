@@ -45,7 +45,7 @@ def _score(edge, samples, origin_x: int, origin_y: int, mpp: float) -> float:
                 pixels[x, y], pixels[x - 1, y], pixels[x + 1, y],
                 pixels[x, y - 1], pixels[x, y + 1],
             ))
-    if len(values) < len(samples) * 0.6:
+    if len(values) < 100:
         return -1
     values.sort(reverse=True)
     keep = max(1, int(len(values) * 0.7))
@@ -59,17 +59,29 @@ def main() -> int:
     parser.add_argument("latitude", type=float)
     parser.add_argument("longitude", type=float)
     parser.add_argument("output", type=Path)
+    parser.add_argument("--origin-x", type=float)
+    parser.add_argument("--origin-y", type=float)
+    parser.add_argument("--search-radius", type=int, default=80)
+    parser.add_argument("--mpp-min", type=float, default=0.48)
+    parser.add_argument("--mpp-max", type=float, default=0.72)
     args = parser.parse_args()
     candidates = building_candidates(args.osm)
     samples = _samples(candidates, args.longitude, args.latitude)
     image = Image.open(args.image).convert("RGB")
     edge = image.convert("L").filter(ImageFilter.FIND_EDGES)
-    center_x, center_y = image.width // 2, image.height // 2
+    center_x = round(args.origin_x) if args.origin_x is not None else image.width // 2
+    center_y = round(args.origin_y) if args.origin_y is not None else image.height // 2
     best = (-1.0, center_x, center_y, 0.6)
-    for mpp_index in range(48, 73, 2):
+    mpp_start = round(args.mpp_min * 100)
+    mpp_end = round(args.mpp_max * 100)
+    for mpp_index in range(mpp_start, mpp_end + 1, 2):
         mpp = mpp_index / 100
-        for origin_x in range(center_x - 80, center_x + 81, 8):
-            for origin_y in range(center_y - 64, center_y + 65, 8):
+        for origin_x in range(
+            center_x - args.search_radius, center_x + args.search_radius + 1, 8,
+        ):
+            for origin_y in range(
+                center_y - args.search_radius, center_y + args.search_radius + 1, 8,
+            ):
                 score = _score(edge, samples, origin_x, origin_y, mpp)
                 if score > best[0]:
                     best = (score, origin_x, origin_y, mpp)
