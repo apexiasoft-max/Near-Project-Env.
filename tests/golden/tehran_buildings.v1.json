@@ -1,0 +1,16 @@
+{
+  "dataset": "tehran-buildings",
+  "version": 1,
+  "license": "synthetic-evaluation-fixtures",
+  "coordinate_precision": "neighborhood-level",
+  "samples": [
+    {"id":"THR-001","district":"Vanak","footprint":[[51.4090,35.7568],[51.4092,35.7568],[51.4092,35.7570],[51.4090,35.7570]],"floors":8,"reviewed_height_m":24.0,"shadow":{"length_m":12.0,"reference_length_m":10.0,"reference_height_m":20.0,"occluded":false},"imagery":"available"},
+    {"id":"THR-002","district":"Elahieh","footprint":[[51.4240,35.7900],[51.4244,35.7900],[51.4244,35.7902],[51.4240,35.7902]],"floors":18,"reviewed_height_m":57.0,"shadow":{"length_m":28.5,"reference_length_m":10.0,"reference_height_m":20.0,"occluded":false},"imagery":"available"},
+    {"id":"THR-003","district":"Saadat Abad","footprint":[[51.3690,35.7800],[51.3693,35.7800],[51.3693,35.7803],[51.3690,35.7803]],"floors":12,"reviewed_height_m":37.0,"shadow":{"length_m":18.5,"reference_length_m":10.0,"reference_height_m":20.0,"occluded":false},"imagery":"partial"},
+    {"id":"THR-004","district":"Bazaar","footprint":[[51.4170,35.6750],[51.4171,35.6750],[51.4171,35.6751],[51.4170,35.6751]],"floors":3,"reviewed_height_m":10.0,"shadow":{"length_m":5.0,"reference_length_m":10.0,"reference_height_m":20.0,"occluded":true},"imagery":"missing"},
+    {"id":"THR-005","district":"Ekbatana","footprint":[[51.3100,35.7050],[51.3108,35.7050],[51.3108,35.7053],[51.3100,35.7053]],"floors":10,"reviewed_height_m":30.0,"shadow":{"length_m":15.0,"reference_length_m":10.0,"reference_height_m":20.0,"occluded":false},"imagery":"available"},
+    {"id":"THR-006","district":"Yousef Abad","footprint":[[51.4010,35.7300],[51.4012,35.7299],[51.4013,35.7302],[51.4010,35.7302]],"floors":6,"reviewed_height_m":19.0,"shadow":{"length_m":9.5,"reference_length_m":10.0,"reference_height_m":20.0,"occluded":false},"imagery":"partial"},
+    {"id":"THR-007","district":"Tehranpars","footprint":[[51.5300,35.7300],[51.5302,35.7300],[51.5302,35.7302],[51.5300,35.7302]],"floors":5,"reviewed_height_m":15.0,"shadow":{"length_m":7.5,"reference_length_m":10.0,"reference_height_m":20.0,"occluded":false},"imagery":"missing"},
+    {"id":"THR-008","district":"Jordan","footprint":[[51.4210,35.7700],[51.4212,35.7699],[51.4214,35.7701],[51.4211,35.7703]],"floors":14,"reviewed_height_m":43.0,"shadow":{"length_m":21.5,"reference_length_m":10.0,"reference_height_m":20.0,"occluded":true},"imagery":"available"}
+  ]
+}
