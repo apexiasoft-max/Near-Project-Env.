@@ -1,0 +1,13 @@
+{
+  "active_human_minutes": 0.0,
+  "blockers": [],
+  "building_count": 12,
+  "completed": true,
+  "duration_minutes": 0.0018635033338796347,
+  "kind": "typical",
+  "project_name": "Typical Tehran validation",
+  "real_project": false,
+  "recorded_at": "2026-07-19T08:48:33.326780+00:00",
+  "run_id": "PILOT-TYPICAL-S6",
+  "workstation": "automated-gate"
+}

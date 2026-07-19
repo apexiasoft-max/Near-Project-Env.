@@ -1,0 +1,12 @@
+{
+  "average_active_human_minutes": null,
+  "human_time_reduction": null,
+  "open_critical_blockers": 0,
+  "passed": false,
+  "real_pilot_count": 0,
+  "reasons": [
+    "Two completed real internal pilots are required",
+    "Active human time reduction is below 75%"
+  ],
+  "typical_validation_passed": true
+}

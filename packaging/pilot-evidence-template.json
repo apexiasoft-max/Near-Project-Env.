@@ -1,0 +1,12 @@
+{
+  "run_id": "PILOT-REAL-001",
+  "project_name": "Internal project name",
+  "kind": "pilot",
+  "real_project": true,
+  "workstation": "dedicated-windows-workstation",
+  "building_count": 12,
+  "duration_minutes": 600,
+  "active_human_minutes": 180,
+  "completed": true,
+  "blockers": []
+}

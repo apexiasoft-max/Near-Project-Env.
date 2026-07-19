@@ -14,6 +14,7 @@ from npe.application.height import HeightService
 from npe.application.inventory import InventoryService
 from npe.application.manual_pool import ManualPoolService
 from npe.application.operations import DiagnosticsService, PrerequisiteService, UpgradeService
+from npe.application.pilots import PilotEvidenceService
 from npe.application.project_lifecycle import ProjectLifecycleService
 from npe.application.recovery import WorkflowRecoveryService
 from npe.application.reference_review import ReferenceReviewService
@@ -52,6 +53,7 @@ class Container:
     prerequisites: PrerequisiteService
     upgrade: UpgradeService
     diagnostics: DiagnosticsService
+    pilots: PilotEvidenceService
 
 
 def bootstrap(settings: Settings | None = None) -> Container:
@@ -90,4 +92,5 @@ def bootstrap(settings: Settings | None = None) -> Container:
         PrerequisiteService(),
         UpgradeService(active, database),
         DiagnosticsService(active, database, health),
+        PilotEvidenceService(active),
     )
