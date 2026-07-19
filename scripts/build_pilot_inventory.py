@@ -20,6 +20,7 @@ def main() -> int:
     parser.add_argument("longitude", type=float)
     parser.add_argument("calibration", type=Path)
     parser.add_argument("--exclude-nearest-project-site", action="store_true")
+    parser.add_argument("--exclude-sources", type=Path)
     args = parser.parse_args()
     calibration = json.loads(args.calibration.read_text(encoding="utf-8"))
     mpp = float(calibration["meters_per_pixel"])
@@ -42,6 +43,9 @@ def main() -> int:
     )
     app = bootstrap()
     candidates = building_candidates(args.osm)
+    if args.exclude_sources:
+        excluded = set(json.loads(args.exclude_sources.read_text(encoding="utf-8")))
+        candidates = [candidate for candidate in candidates if candidate.source not in excluded]
     if args.exclude_nearest_project_site and candidates:
         def distance(candidate):
             lon = sum(point[0] for point in candidate.polygon) / len(candidate.polygon)
