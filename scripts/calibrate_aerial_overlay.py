@@ -11,6 +11,15 @@ from npe.application.inventory import EARTH_RADIUS_M
 from npe.infrastructure.osm import building_candidates
 
 
+def _geojson_candidates(path: Path):
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    return [
+        type("PolygonCandidate", (), {"polygon": feature["geometry"]["coordinates"][0][:-1]})
+        for feature in payload.get("features", [])
+        if feature.get("geometry", {}).get("type") == "Polygon"
+    ]
+
+
 def _local_meters(lon: float, lat: float, lon0: float, lat0: float) -> tuple[float, float]:
     x = math.radians(lon - lon0) * EARTH_RADIUS_M * math.cos(math.radians(lat0))
     y = math.radians(lat - lat0) * EARTH_RADIUS_M
@@ -55,7 +64,7 @@ def _score(edge, samples, origin_x: int, origin_y: int, mpp: float) -> float:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("image", type=Path)
-    parser.add_argument("osm", type=Path)
+    parser.add_argument("geometry", type=Path)
     parser.add_argument("latitude", type=float)
     parser.add_argument("longitude", type=float)
     parser.add_argument("output", type=Path)
@@ -65,7 +74,11 @@ def main() -> int:
     parser.add_argument("--mpp-min", type=float, default=0.48)
     parser.add_argument("--mpp-max", type=float, default=0.72)
     args = parser.parse_args()
-    candidates = building_candidates(args.osm)
+    candidates = (
+        _geojson_candidates(args.geometry)
+        if args.geometry.suffix.lower() in {".json", ".geojson"}
+        else building_candidates(args.geometry)
+    )
     samples = _samples(candidates, args.longitude, args.latitude)
     image = Image.open(args.image).convert("RGB")
     edge = image.convert("L").filter(ImageFilter.FIND_EDGES)
