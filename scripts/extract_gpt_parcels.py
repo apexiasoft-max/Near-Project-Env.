@@ -29,7 +29,10 @@ def main() -> int:
     homography, inliers = _align(annotated, source)
     red = _red_mask(annotated)
     warped = cv2.warpPerspective(red, homography, (source.shape[1], source.shape[0]))
-    warped = cv2.morphologyEx(warped, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
+    # GPT may leave sub-pixel breaks in otherwise closed parcel outlines. A larger
+    # closing kernel repairs those gaps after registration without expanding the
+    # parcel selection itself.
+    warped = cv2.morphologyEx(warped, cv2.MORPH_CLOSE, np.ones((15, 15), np.uint8))
     warped = cv2.dilate(warped, np.ones((3, 3), np.uint8), iterations=1)
 
     origin = np.array(
@@ -163,17 +166,20 @@ def _parcel_regions(mask: np.ndarray, origin: np.ndarray, radius_px: float) -> l
     parcels: list[np.ndarray] = []
     for label in range(1, count):
         x, y, width, height, area = (int(value) for value in stats[label])
-        if area < 900 or area > 45_000 or width < 18 or height < 18:
+        if area < 700 or area > 60_000 or width < 14 or height < 14:
             continue
         component = np.where(labels == label, 255, 0).astype(np.uint8)
         contours, _ = cv2.findContours(component, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         if not contours:
             continue
         contour = max(contours, key=cv2.contourArea)
-        centroid = np.array(_centroid(contour))
-        if np.linalg.norm(centroid - origin) > radius_px:
-            continue
-        if cv2.contourArea(contour) / max(width * height, 1) < 0.24:
+        # Scope membership is based on polygon-circle intersection, not centroid.
+        # Otherwise a nearby parcel whose center falls just outside the radius is
+        # incorrectly dropped even though part of the building is in scope.
+        signed_distance = cv2.pointPolygonTest(
+            contour, (float(origin[0]), float(origin[1])), True
+        )
+        if signed_distance < 0 and abs(signed_distance) > radius_px:
             continue
         parcels.append(contour)
     return parcels
