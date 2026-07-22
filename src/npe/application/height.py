@@ -48,6 +48,36 @@ class HeightService:
         )
 
     @staticmethod
+    def from_aerial_relative(
+        floors: int,
+        minimum_floors: int,
+        maximum_floors: int,
+        confidence: float,
+        evidence: str,
+        floor_height_m: float = 3.1,
+    ) -> HeightEstimate:
+        if not (0 < minimum_floors <= floors <= maximum_floors):
+            raise ValueError("Invalid aerial floor range")
+        if not 0 <= confidence <= 1 or not evidence.strip():
+            raise ValueError("Aerial estimate requires confidence and evidence")
+        if not 2.4 <= floor_height_m <= 5.0:
+            raise ValueError("Invalid floor height")
+        return HeightEstimate(
+            floors * floor_height_m,
+            floors,
+            minimum_floors * floor_height_m,
+            maximum_floors * floor_height_m,
+            HeightMethod.AERIAL_RELATIVE,
+            confidence,
+            {
+                "minimum_floors": minimum_floors,
+                "maximum_floors": maximum_floors,
+                "floor_height_m": floor_height_m,
+                "observation": evidence.strip(),
+            },
+        )
+
+    @staticmethod
     def override(height_m: float, floors: int | None, reason: str) -> HeightEstimate:
         if height_m <= 0 or (floors is not None and floors <= 0) or not reason.strip():
             raise ValueError("Human override requires valid dimensions and a reason")
@@ -73,4 +103,3 @@ class HeightService:
             )
         if cursor.rowcount != 1:
             raise KeyError(building_id)
-

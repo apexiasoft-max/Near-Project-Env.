@@ -27,3 +27,15 @@ def test_override_requires_explanation() -> None:
     with pytest.raises(ValueError, match="reason"):
         HeightService.override(24, 8, "")
     assert HeightService.override(24, 8, "survey").confidence == 1
+
+
+def test_aerial_relative_estimate_preserves_range_and_evidence() -> None:
+    estimate = HeightService.from_aerial_relative(6, 5, 7, 0.62, "clear relative shadow")
+    assert estimate.height_m == pytest.approx(18.6)
+    assert estimate.minimum_m == pytest.approx(15.5)
+    assert estimate.maximum_m == pytest.approx(21.7)
+    assert estimate.method == HeightMethod.AERIAL_RELATIVE
+    assert estimate.evidence["observation"] == "clear relative shadow"
+
+    with pytest.raises(ValueError, match="range"):
+        HeightService.from_aerial_relative(6, 7, 8, 0.5, "invalid")

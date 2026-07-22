@@ -9,6 +9,7 @@ from enum import StrEnum
 class HeightMethod(StrEnum):
     FLOOR_COUNT = "floor_count"
     CALIBRATED_SHADOW = "calibrated_shadow"
+    AERIAL_RELATIVE = "aerial_relative"
     HUMAN_OVERRIDE = "human_override"
 
 
@@ -21,4 +22,3 @@ class HeightEstimate:
     method: HeightMethod
     confidence: float
     evidence: dict[str, object]
-
